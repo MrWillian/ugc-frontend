@@ -1,0 +1,31 @@
+# MetricRadar - Regras de Desenvolvimento (Cursor AI)
+
+## Stack Obrigatória
+- **Build Tool:** Vite
+- **Estilos:** Tailwind CSS com `cn()` utility (clsx + tailwind-merge).
+- **Componentes UI:** `shadcn/ui` (Instalar via CLI apenas quando solicitado).
+- **Gráficos:** Recharts.
+
+## Diretrizes de Arquitetura (Frontend)
+1. **Estrutura de Pastas:** `src/features/[nome-da-feature]`. Ex: `src/features/dashboard/widgets`.
+2. **Componentes:**
+   - **Widgets:** Devem ser "Dumb Components". Recebem `title`, `value`, `trend` e `isLoading`.
+   - **Loading States:** SEMPRE usar `Skeleton` do `shadcn/ui`. NUNCA um simples "Loading...".
+3. **Dados:** Usar `src/mocks/metrics.ts` para simular API. Não inventar dados dentro do componente.
+
+## Padrões de Código (Estilo e Manutenção)
+- **Tipagem:** TypeScript Strict. Se o Agente tentar usar `any`, corrija imediatamente.
+- **Formatação de Números:**
+  - Moeda: `new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor)`
+  - Percentual: Multiplicar por 100 e adicionar `%` com 1 casa decimal.
+- **Cores de Tendência:**
+  - Positivo (Lucro/Crescimento): `text-green-600`
+  - Negativo (Churn/Queda): `text-red-600`
+  - Neutro: `text-gray-600`
+
+## Interação com o Agente (Como eu quero que você trabalhe)
+- **Modo Operacional:** Sempre usar o **Composer (Cmd+I)** no modo **Agent**.
+- **Atomicidade:** Para cada Widget novo, você deve criar:
+      1. O Componente do Widget
+      2. O Skeleton do Widget
+- **Verificação:** Após escrever o código, execute `npm run build` para garantir que não há erros de TypeScript.
