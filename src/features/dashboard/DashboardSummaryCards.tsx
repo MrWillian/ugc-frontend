@@ -4,23 +4,8 @@ import type { DashboardSummary } from "@/features/dashboard/useDashboardSummary"
 export function DashboardSummaryCards(
   props: DashboardSummary,
 ): JSX.Element {
-  if (props.isLoading) {
+  if (props.isLoading && !props.isError) {
     return <p className="mt-6">Carregando resumo…</p>;
-  }
-
-  if (props.isError) {
-    return (
-      <div className="mt-6" role="alert">
-        <p>{props.errorMessage ?? "Não foi possível carregar o resumo."}</p>
-        <button
-          className="mt-2 font-medium text-primary underline"
-          type="button"
-          onClick={props.refetch}
-        >
-          Tentar novamente
-        </button>
-      </div>
-    );
   }
 
   const metrics = [
@@ -30,16 +15,31 @@ export function DashboardSummaryCards(
   ];
 
   return (
-    <section
-      className="mt-6 grid gap-4 sm:grid-cols-3"
-      aria-label="Resumo do dashboard"
-    >
-      {metrics.map((metric) => (
-        <div className="rounded-lg border p-4" key={metric.label}>
-          <p className="text-sm text-muted-foreground">{metric.label}</p>
-          <p className="mt-2 text-2xl font-semibold">{metric.value}</p>
+    <>
+      {props.isError && (
+        <div className="mt-6" role="alert">
+          <p>{props.errorMessage ?? "Não foi possível carregar o resumo."}</p>
+          <button
+            className="mt-2 font-medium text-primary underline disabled:opacity-50"
+            type="button"
+            onClick={props.refetch}
+            disabled={props.isFetching}
+          >
+            {props.isFetching ? "Tentando novamente…" : "Tentar novamente"}
+          </button>
         </div>
-      ))}
-    </section>
+      )}
+      <section
+        className="mt-6 grid gap-4 sm:grid-cols-3"
+        aria-label="Resumo do dashboard"
+      >
+        {metrics.map((metric) => (
+          <div className="rounded-lg border p-4" key={metric.label}>
+            <p className="text-sm text-muted-foreground">{metric.label}</p>
+            <p className="mt-2 text-2xl font-semibold">{metric.value}</p>
+          </div>
+        ))}
+      </section>
+    </>
   );
 }

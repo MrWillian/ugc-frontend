@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   fetchCampaigns,
   fetchPendingPostsMeta,
@@ -13,6 +14,7 @@ export interface DashboardSummary {
   widgets: number;
   isLoading: boolean;
   isError: boolean;
+  isFetching: boolean;
   errorMessage: string | null;
   refetch(): void;
 }
@@ -33,27 +35,45 @@ export function useDashboardSummary(): DashboardSummary {
 
   const firstError =
     campaignsQuery.error ?? pendingQuery.error ?? widgetsQuery.error;
+  const [retryError, setRetryError] = useState<unknown>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const isFetching =
+    isRetrying ||
+    campaignsQuery.isFetching ||
+    pendingQuery.isFetching ||
+    widgetsQuery.isFetching;
+  const displayedError = firstError ?? (isRetrying ? retryError : null);
+  const campaigns = Array.isArray(campaignsQuery.data)
+    ? campaignsQuery.data
+    : [];
+  const widgets = Array.isArray(widgetsQuery.data) ? widgetsQuery.data : [];
 
   return {
-    activeCampaigns:
-      campaignsQuery.data?.filter((campaign) => campaign.active).length ?? 0,
-    pendingPosts: pendingQuery.data?.meta.total ?? 0,
-    widgets: widgetsQuery.data?.length ?? 0,
+    activeCampaigns: campaigns.filter((campaign) => campaign.active).length,
+    pendingPosts: pendingQuery.data?.meta?.total ?? 0,
+    widgets: widgets.length,
     isLoading:
-      campaignsQuery.isPending ||
-      pendingQuery.isPending ||
-      widgetsQuery.isPending,
-    isError: Boolean(firstError),
+      !campaignsQuery.isFetched ||
+      !pendingQuery.isFetched ||
+      !widgetsQuery.isFetched,
+    isError: Boolean(displayedError),
+    isFetching,
     errorMessage:
-      firstError instanceof Error
-        ? firstError.message
-        : firstError
+      displayedError instanceof Error
+        ? displayedError.message
+        : displayedError
           ? "Não foi possível carregar o resumo."
           : null,
     refetch() {
-      void campaignsQuery.refetch();
-      void pendingQuery.refetch();
-      void widgetsQuery.refetch();
+      setRetryError(firstError);
+      setIsRetrying(true);
+      void Promise.all([
+        campaignsQuery.refetch(),
+        pendingQuery.refetch(),
+        widgetsQuery.refetch(),
+      ]).finally(() => {
+        setIsRetrying(false);
+      });
     },
   };
 }

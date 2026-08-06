@@ -87,10 +87,15 @@ describe("dashboard summary", () => {
   });
 
   it("shows an error and retries all summary requests", async () => {
+    let campaignCalls = 0;
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockImplementation(async (input) => {
         if (String(input) === "/api/campaigns") {
+          campaignCalls += 1;
+          if (campaignCalls > 2) {
+            return new Promise<Response>(() => undefined);
+          }
           return jsonResponse(
             { message: "Falha ao carregar campanhas." },
             { status: 500 },
@@ -99,16 +104,21 @@ describe("dashboard summary", () => {
         if (String(input) === "/api/posts?status=pending&limit=1") {
           return jsonResponse({
             data: [],
-            meta: { page: 1, limit: 1, total: 0, totalPages: 0 },
+            meta: { page: 1, limit: 1, total: 7, totalPages: 7 },
           });
         }
-        return jsonResponse([]);
+        return jsonResponse([{ id: "w1" }, { id: "w2" }]);
       });
 
     renderSummary();
 
     const alert = await screen.findByRole("alert", {}, { timeout: 3_000 });
     expect(alert).toHaveTextContent("Falha ao carregar campanhas.");
+    expect(screen.getByText("Campanhas ativas")).toBeInTheDocument();
+    expect(screen.getByText("Pendentes de moderação")).toBeInTheDocument();
+    expect(screen.getByText("Widgets")).toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
     const callsBeforeRetry = fetchMock.mock.calls.length;
 
     await userEvent.click(
@@ -118,6 +128,26 @@ describe("dashboard summary", () => {
     await waitFor(() => {
       expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBeforeRetry);
     });
+    expect(
+      screen.getByRole("button", { name: "Tentando novamente…" }),
+    ).toBeDisabled();
+  });
+
+  it("treats malformed successful payloads as zero counts", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (String(input) === "/api/campaigns") {
+        return jsonResponse({ data: "not-an-array" });
+      }
+      if (String(input) === "/api/posts?status=pending&limit=1") {
+        return jsonResponse({ data: [] });
+      }
+      return jsonResponse({ widgets: null });
+    });
+
+    renderSummary();
+
+    expect(await screen.findByText("Campanhas ativas")).toBeInTheDocument();
+    expect(screen.getAllByText("0")).toHaveLength(3);
   });
 
   it("renders the client name and plan in the header", () => {
