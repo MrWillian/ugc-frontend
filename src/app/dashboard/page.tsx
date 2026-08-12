@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { DashboardHeader } from "@/features/dashboard/DashboardHeader";
+import { DashboardSummaryCards } from "@/features/dashboard/DashboardSummaryCards";
+import { useDashboardSummary } from "@/features/dashboard/useDashboardSummary";
 import { InstagramConnectionCard } from "@/features/instagram/InstagramConnectionCard";
 
 export default function DashboardPage() {
   const { isLoading, user } = useAuth();
+  const summary = useDashboardSummary();
 
   if (isLoading) {
     return <main className="p-6">Carregando...</main>;
@@ -13,11 +17,10 @@ export default function DashboardPage() {
 
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-semibold">
-        {user ? `Olá, ${user.name}` : "Dashboard"}
-      </h1>
       {user ? (
         <>
+          <DashboardHeader name={user.name} plan={user.plan} />
+          <DashboardSummaryCards {...summary} />
           <InstagramConnectionCard />
           <Link className="mt-4 inline-block text-primary underline" href="/logout">
             Sair
