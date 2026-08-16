@@ -1,30 +1,25 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import {
-  ACCESS_TOKEN_COOKIE,
-  backendErrorMessage,
-  backendRequest,
-} from "@/lib/auth-server";
+import type { CreateCampaignBody } from "@/types";
+import { forwardCampaigns, requireAccessToken } from "./bff";
 
 export async function GET() {
-  const token = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
-  if (!token) {
-    return NextResponse.json({ message: "Não autenticado." }, { status: 401 });
+  const auth = await requireAccessToken();
+  if (!auth.ok) return auth.response;
+
+  return forwardCampaigns(auth.token, "/campaigns", { method: "GET" });
+}
+
+export async function POST(request: Request) {
+  const auth = await requireAccessToken();
+  if (!auth.ok) return auth.response;
+
+  const { name, hashtag, terms_text } = (await request.json()) as CreateCampaignBody;
+  const body: CreateCampaignBody = { name, hashtag };
+  if (typeof terms_text === "string") {
+    body.terms_text = terms_text;
   }
 
-  const backendResponse = await backendRequest(
-    "/campaigns",
-    { method: "GET" },
-    token,
-  );
-  const payload: unknown = await backendResponse.json();
-
-  if (!backendResponse.ok) {
-    return NextResponse.json(
-      { message: backendErrorMessage(payload) },
-      { status: backendResponse.status },
-    );
-  }
-
-  return NextResponse.json(payload);
+  return forwardCampaigns(auth.token, "/campaigns", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
