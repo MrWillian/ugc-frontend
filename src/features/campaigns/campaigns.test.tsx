@@ -61,7 +61,7 @@ describe("CampaignsList", () => {
     expect(within(row).getByRole("button", { name: "Desativar" })).toBeInTheDocument();
     expect(within(row).getByRole("link", { name: "Ver Posts" })).toHaveAttribute(
       "href",
-      "/campaigns/campaign-1/posts",
+      "/posts?campaignId=campaign-1",
     );
   });
 
@@ -98,6 +98,28 @@ describe("CampaignForm", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it("links back to the campaigns list from create", () => {
+    render(<CampaignForm mode="create" />);
+
+    expect(screen.getByRole("heading", { name: "Nova Campanha" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voltar às campanhas" })).toHaveAttribute(
+      "href",
+      "/campaigns",
+    );
+  });
+
+  it("links back to the campaigns list from edit", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json(campaign));
+    render(<CampaignForm mode="edit" campaignId="campaign-1" />);
+
+    expect(screen.getByRole("heading", { name: "Editar Campanha" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voltar às campanhas" })).toHaveAttribute(
+      "href",
+      "/campaigns",
+    );
+    expect(await screen.findByDisplayValue("Campanha verão")).toBeInTheDocument();
   });
 
   it("blocks create submission until name and hashtag are valid", async () => {

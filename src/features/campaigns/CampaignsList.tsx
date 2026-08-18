@@ -136,7 +136,7 @@ export function CampaignsList(): JSX.Element {
                         {campaign.active ? "Desativar" : "Ativar"}
                       </Button>
                       <Button asChild size="sm" variant="ghost">
-                        <Link href={`/campaigns/${campaign.id}/posts`}>
+                        <Link href={`/posts?campaignId=${campaign.id}`}>
                           Ver Posts
                         </Link>
                       </Button>
