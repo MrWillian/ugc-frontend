@@ -20,44 +20,52 @@ Vitest, Testing Library, existing BFF helpers (`backendRequest`,
 ## Global Constraints
 
 - Call only `GET /campaigns`, `GET /posts?status=pending&limit=1`, and
-  `GET /widgets` for summary metrics (via BFF).
+`GET /widgets` for summary metrics (via BFF).
 - Use the HTTP-only `accessToken` cookie and server-side Bearer authorization.
 - Never return the JWT to browser code.
 - Plan label from `useAuth().user.plan` — do not call
-  `GET /subscription/current` in this phase.
+`GET /subscription/current` in this phase.
 - Out of scope: total posts card, charts, campaign/widget CRUD.
 - Preserve `InstagramConnectionCard` on `/dashboard`.
 - Do not commit unless the user explicitly requests it.
 
 ---
 
+
+
 ## File Structure
 
-| File | Responsibility |
-| --- | --- |
-| `src/components/providers/QueryProvider.tsx` | Client `QueryClientProvider` wrapper |
-| `src/app/layout.tsx` | Mount `QueryProvider` around `AuthProvider` children |
-| `src/app/api/campaigns/route.ts` | BFF `GET /campaigns` |
-| `src/app/api/posts/route.ts` | BFF `GET /posts` with query string forward |
-| `src/app/api/widgets/route.ts` | BFF `GET /widgets` |
-| `src/app/api/dashboard/routes.test.ts` | BFF auth, forwarding, errors |
-| `src/features/dashboard/api.ts` | Browser fetch helpers for BFF endpoints |
-| `src/features/dashboard/useDashboardSummary.ts` | Three React Query hooks + aggregates |
-| `src/features/dashboard/DashboardHeader.tsx` | Client name + plan |
-| `src/features/dashboard/DashboardSummaryCards.tsx` | Three metric cards + loading/error |
-| `src/features/dashboard/dashboard.test.tsx` | Hook/UI behavior tests |
-| `src/app/dashboard/page.tsx` | Compose header, cards, Instagram, logout |
+
+| File                                               | Responsibility                                       |
+| -------------------------------------------------- | ---------------------------------------------------- |
+| `src/components/providers/QueryProvider.tsx`       | Client `QueryClientProvider` wrapper                 |
+| `src/app/layout.tsx`                               | Mount `QueryProvider` around `AuthProvider` children |
+| `src/app/api/campaigns/route.ts`                   | BFF `GET /campaigns`                                 |
+| `src/app/api/posts/route.ts`                       | BFF `GET /posts` with query string forward           |
+| `src/app/api/widgets/route.ts`                     | BFF `GET /widgets`                                   |
+| `src/app/api/dashboard/routes.test.ts`             | BFF auth, forwarding, errors                         |
+| `src/features/dashboard/api.ts`                    | Browser fetch helpers for BFF endpoints              |
+| `src/features/dashboard/useDashboardSummary.ts`    | Three React Query hooks + aggregates                 |
+| `src/features/dashboard/DashboardHeader.tsx`       | Client name + plan                                   |
+| `src/features/dashboard/DashboardSummaryCards.tsx` | Three metric cards + loading/error                   |
+| `src/features/dashboard/dashboard.test.tsx`        | Hook/UI behavior tests                               |
+| `src/app/dashboard/page.tsx`                       | Compose header, cards, Instagram, logout             |
+
 
 ---
+
+
 
 ### Task 1: Add React Query as app provider
 
 **Files:**
+
 - Create: `src/components/providers/QueryProvider.tsx`
 - Modify: `src/app/layout.tsx`
 - Create: `src/components/providers/QueryProvider.test.tsx`
 
 **Interfaces:**
+
 - Consumes: none
 - Produces:
 
@@ -156,17 +164,21 @@ Expected: PASS.
 
 ---
 
+
+
 ### Task 2: Add campaigns, posts, and widgets BFF routes
 
 **Files:**
+
 - Create: `src/app/api/campaigns/route.ts`
 - Create: `src/app/api/posts/route.ts`
 - Create: `src/app/api/widgets/route.ts`
 - Create: `src/app/api/dashboard/routes.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ACCESS_TOKEN_COOKIE`, `backendRequest`, `backendErrorMessage` from
-  `@/lib/auth-server`
+`@/lib/auth-server`
 - Produces:
 
 ```ts
@@ -184,15 +196,15 @@ pattern (`vi.mock("next/headers")`, stub `fetch`, set
 Cover at least:
 
 1. Campaigns: cookie present → forwards
-   `http://api.test/campaigns` with `Authorization: Bearer jwt-value` and
+  `http://api.test/campaigns` with `Authorization: Bearer jwt-value` and
    returns the backend array.
 2. Posts: request to
-   `new Request("http://localhost/api/posts?status=pending&limit=1")` →
+  `new Request("http://localhost/api/posts?status=pending&limit=1")` →
    forwards `http://api.test/posts?status=pending&limit=1` with Bearer and
    returns `{ data, meta }`.
 3. Widgets: cookie present → forwards `http://api.test/widgets` with Bearer.
 4. Missing cookie on any route → `401` and
-   `{ message: "Não autenticado." }`.
+  `{ message: "Não autenticado." }`.
 5. Backend `403` on campaigns → preserves status and Nest `message`.
 
 Example posts assertion:
@@ -296,9 +308,12 @@ Expected: PASS for forwarding, query string, unauthorized, and error cases.
 
 ---
 
+
+
 ### Task 3: Build dashboard summary hook and UI
 
 **Files:**
+
 - Create: `src/features/dashboard/api.ts`
 - Create: `src/features/dashboard/useDashboardSummary.ts`
 - Create: `src/features/dashboard/DashboardHeader.tsx`
@@ -307,9 +322,10 @@ Expected: PASS for forwarding, query string, unauthorized, and error cases.
 - Modify: `src/app/dashboard/page.tsx`
 
 **Interfaces:**
+
 - Consumes: `Campaign`, `CollectedPost`, `PaginatedResponse`, `Widget`, `Plan`,
-  `Client` from `@/types`; BFF routes from Task 2; `QueryProvider` from Task 1;
-  `useAuth` from `@/contexts/AuthContext`
+`Client` from `@/types`; BFF routes from Task 2; `QueryProvider` from Task 1;
+`useAuth` from `@/contexts/AuthContext`
 - Produces:
 
 ```ts
@@ -364,14 +380,12 @@ Render `DashboardSummaryCards` via a small harness that calls
 `useDashboardSummary`, then assert visible texts for `1`, `7`, and `2`
 (or labels “Campanhas ativas”, “Pendentes de moderação”, “Widgets”).
 
-2. **Loading** — leave fetch pending; assert loading text/placeholder
-   (e.g. “Carregando resumo…”).
-
-3. **Error + retry** — reject campaigns fetch; assert `role="alert"`; click
-   retry; assert fetch called again.
-
-4. **Header** — render `<DashboardHeader name="Acme" plan="FREE" />`;
-   assert “Acme” and “FREE” (or Portuguese plan label including FREE).
+1. **Loading** — leave fetch pending; assert loading text/placeholder
+  (e.g. “Carregando resumo…”).
+2. **Error + retry** — reject campaigns fetch; assert `role="alert"`; click
+  retry; assert fetch called again.
+3. **Header** — render `<DashboardHeader name="Acme" plan="FREE" />`;
+  assert “Acme” and “FREE” (or Portuguese plan label including FREE).
 
 Also assert fetch URLs include:
 
@@ -507,7 +521,7 @@ label (plain text is fine; no new design system).
 
 - If `isLoading`, show “Carregando resumo…”.
 - If `isError`, show `role="alert"` with `errorMessage` and a button
-  “Tentar novamente” calling `refetch`.
+“Tentar novamente” calling `refetch`.
 - Otherwise render three metrics with labels in Portuguese:
   - “Campanhas ativas”
   - “Pendentes de moderação”
@@ -518,19 +532,19 @@ Keep styling consistent with the existing dashboard (`p-6`, simple Tailwind,
 no new card library unless already present). Prefer a simple grid of three
 metric blocks without decorative chrome beyond spacing/typography.
 
-- [ ] **Step 5: Wire `/dashboard`**
+- [ ] **Step 5: Wire** `/dashboard`
 
 Update `src/app/dashboard/page.tsx` (already `"use client"`) to:
 
 1. Keep auth loading (`Carregando…`) and unauthenticated message.
 2. Call `const summary = useDashboardSummary()` at the top of the component
-   (hooks must run unconditionally; the summary UI can ignore values while
+  (hooks must run unconditionally; the summary UI can ignore values while
    auth is still loading).
 3. When `user` exists:
-   - Render `<DashboardHeader name={user.name} plan={user.plan} />`
-   - Render `<DashboardSummaryCards {...summary} />`
-   - Keep `<InstagramConnectionCard />`
-   - Keep logout `Link` to `/logout`
+  - Render `<DashboardHeader name={user.name} plan={user.plan} />`
+  - Render `<DashboardSummaryCards {...summary} />`
+  - Keep `<InstagramConnectionCard />`
+  - Keep logout `Link` to `/logout`
 
 - [ ] **Step 6: Run feature tests**
 
@@ -540,9 +554,12 @@ Expected: PASS for loading, derived counts, error/retry, and header.
 
 ---
 
+
+
 ### Task 4: Verify the complete feature
 
 **Files:**
+
 - None new (verification only)
 
 - [ ] **Step 1: Run all tests**
@@ -556,11 +573,11 @@ dashboard).
 
 Run: `npm run lint && npm run build`
 
-Expected: both commands exit with code 0.
+´Expected: both commands exit with code 0.
 
 - [ ] **Step 3: Review feature diff**
 
-Run: `git diff --check && git diff --stat && git status --short`
+`Run: `git diff --check && git diff --stat && git status --short`
 
 Expected: no whitespace errors; changes limited to React Query provider,
 dashboard BFF routes, dashboard feature module, dashboard page, tests,
@@ -568,15 +585,20 @@ dashboard BFF routes, dashboard feature module, dashboard page, tests,
 
 ---
 
+
+
 ## Spec coverage checklist
 
-| Spec requirement | Task |
-| --- | --- |
-| React Query provider in root layout | Task 1 |
-| BFF `/api/campaigns`, `/api/posts`, `/api/widgets` | Task 2 |
-| Parallel queries + derived metrics | Task 3 |
-| Header name + plan from auth | Task 3 |
-| Loading / error / retry / zeros | Task 3 |
-| Keep Instagram card | Task 3 |
-| No total-posts card / chart / subscription | Global Constraints |
-| Tests + lint + build | Task 4 |
+
+| Spec requirement                                   | Task               |
+| -------------------------------------------------- | ------------------ |
+| React Query provider in root layout                | Task 1             |
+| BFF `/api/campaigns`, `/api/posts`, `/api/widgets` | Task 2             |
+| Parallel queries + derived metrics                 | Task 3             |
+| Header name + plan from auth                       | Task 3             |
+| Loading / error / retry / zeros                    | Task 3             |
+| Keep Instagram card                                | Task 3             |
+| No total-posts card / chart / subscription         | Global Constraints |
+| Tests + lint + build                               | Task 4             |
+
+
