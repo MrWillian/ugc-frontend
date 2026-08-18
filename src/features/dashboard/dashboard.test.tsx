@@ -59,7 +59,10 @@ describe("dashboard summary", () => {
     renderSummary();
 
     expect(await screen.findByText("Campanhas ativas")).toBeInTheDocument();
-    expect(screen.getByText("Pendentes de moderação")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Pendentes de moderação" })).toHaveAttribute(
+      "href",
+      "/posts?status=pending",
+    );
     expect(screen.getByText("Widgets")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();

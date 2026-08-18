@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { JSX } from "react";
 import type { DashboardSummary } from "@/features/dashboard/useDashboardSummary";
 
@@ -9,9 +10,13 @@ export function DashboardSummaryCards(
   }
 
   const metrics = [
-    { label: "Campanhas ativas", value: props.activeCampaigns },
-    { label: "Pendentes de moderação", value: props.pendingPosts },
-    { label: "Widgets", value: props.widgets },
+    { href: "/campaigns", label: "Campanhas ativas", value: props.activeCampaigns },
+    {
+      href: "/posts?status=pending",
+      label: "Pendentes de moderação",
+      value: props.pendingPosts,
+    },
+    { href: undefined, label: "Widgets", value: props.widgets },
   ];
 
   return (
@@ -33,12 +38,33 @@ export function DashboardSummaryCards(
         className="mt-6 grid gap-4 sm:grid-cols-3"
         aria-label="Resumo do dashboard"
       >
-        {metrics.map((metric) => (
-          <div className="rounded-lg border p-4" key={metric.label}>
-            <p className="text-sm text-muted-foreground">{metric.label}</p>
-            <p className="mt-2 text-2xl font-semibold">{metric.value}</p>
-          </div>
-        ))}
+        {metrics.map((metric) => {
+          const content = (
+            <>
+              <p className="text-sm text-muted-foreground">{metric.label}</p>
+              <p className="mt-2 text-2xl font-semibold">{metric.value}</p>
+            </>
+          );
+
+          if (metric.href) {
+            return (
+              <Link
+                aria-label={metric.label}
+                className="rounded-lg border p-4 hover:bg-accent/40"
+                href={metric.href}
+                key={metric.label}
+              >
+                {content}
+              </Link>
+            );
+          }
+
+          return (
+            <div className="rounded-lg border p-4" key={metric.label}>
+              {content}
+            </div>
+          );
+        })}
       </section>
     </>
   );

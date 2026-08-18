@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth-server";
 
-const protectedPrefixes = ["/dashboard", "/campaigns", "/widgets"];
+const protectedPrefixes = ["/dashboard", "/campaigns", "/widgets", "/posts"];
 const publicPaths = new Set(["/login", "/signup"]);
 
 export function proxy(request: NextRequest) {
@@ -22,5 +22,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/campaigns/:path*", "/widgets/:path*", "/login", "/signup"],
+  matcher: [
+    "/dashboard/:path*",
+    "/campaigns/:path*",
+    "/widgets/:path*",
+    "/posts/:path*",
+    "/login",
+    "/signup",
+  ],
 };

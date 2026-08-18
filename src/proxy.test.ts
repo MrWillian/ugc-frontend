@@ -8,6 +8,7 @@ describe("proxy config", () => {
       "/dashboard/:path*",
       "/campaigns/:path*",
       "/widgets/:path*",
+      "/posts/:path*",
       "/login",
       "/signup",
     ]);
@@ -23,6 +24,12 @@ describe("proxy", () => {
 
   it("redirects a missing-cookie campaigns request to login", () => {
     const response = proxy(new NextRequest("http://localhost/campaigns"));
+
+    expect(response.headers.get("location")).toBe("http://localhost/login");
+  });
+
+  it("redirects a missing-cookie posts request to login", () => {
+    const response = proxy(new NextRequest("http://localhost/posts"));
 
     expect(response.headers.get("location")).toBe("http://localhost/login");
   });

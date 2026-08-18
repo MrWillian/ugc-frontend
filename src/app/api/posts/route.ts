@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { allowedPostsSearch } from "@/app/api/posts/query";
 import {
   ACCESS_TOKEN_COOKIE,
   backendErrorMessage,
@@ -12,9 +13,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: "Não autenticado." }, { status: 401 });
   }
 
-  const { search } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const backendResponse = await backendRequest(
-    `/posts${search}`,
+    `/posts${allowedPostsSearch(searchParams)}`,
     { method: "GET" },
     token,
   );

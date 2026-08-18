@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useEffect, useState, type JSX } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -116,12 +117,29 @@ export function CampaignForm(props: CampaignFormProps): JSX.Element {
     }
   };
 
+  const heading = isEdit ? "Editar Campanha" : "Nova Campanha";
+  const header = (
+    <div className="mb-6 flex items-center justify-between gap-4">
+      <h1 className="text-2xl font-semibold">{heading}</h1>
+      <Link className="text-primary underline" href="/campaigns">
+        Voltar às campanhas
+      </Link>
+    </div>
+  );
+
   if (isLoadingCampaign) {
-    return <p>Carregando campanha...</p>;
+    return (
+      <>
+        {header}
+        <p>Carregando campanha...</p>
+      </>
+    );
   }
 
   return (
-    <form className="mt-6 max-w-lg space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
+    <>
+      {header}
+      <form className="max-w-lg space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-1">
         <Label htmlFor="campaign-name">Nome</Label>
         <Input
@@ -174,5 +192,6 @@ export function CampaignForm(props: CampaignFormProps): JSX.Element {
         {isSubmitting ? "Enviando..." : "Salvar"}
       </Button>
     </form>
+    </>
   );
 }

@@ -202,6 +202,15 @@ export interface RejectPostBody {
 
 export type PostListStatusQuery = "pending" | "approved" | "rejected";
 
+/** Filtros da listagem `/posts`. page/limit/status vão para a API; campaignId escolhe o endpoint; search filtra caption no cliente. */
+export interface ModerationQuery {
+  page?: number;
+  limit?: number;
+  status?: PostListStatusQuery;
+  campaignId?: string;
+  search?: string;
+}
+
 // ─── Consentimento / UgcPermission ────────────────────────────────────────────
 
 export interface UgcPermission {
