@@ -10,6 +10,7 @@ vi.mock("next/headers", () => ({
 
 import { GET as listGet, POST as createPost } from "@/app/api/campaigns/route";
 import { GET as getById, PATCH as patchById } from "@/app/api/campaigns/[id]/route";
+import { GET as listCampaignPosts } from "@/app/api/campaigns/[id]/posts/route";
 
 const campaign = {
   id: "campaign-1",
@@ -80,6 +81,29 @@ describe("Campaigns BFF routes", () => {
     );
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual(campaign);
+  });
+
+  it("forwards GET /campaigns/:id/posts with only page, limit and status", async () => {
+    cookieSpies.get.mockReturnValue({ value: "jwt-value" });
+    const payload = { data: [], meta: { page: 2, limit: 20, total: 0, totalPages: 0 } };
+    const fetchMock = vi.fn().mockResolvedValueOnce(Response.json(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await listCampaignPosts(
+      new Request(
+        "http://localhost/api/campaigns/campaign-1/posts?page=2&limit=20&status=pending&search=praia",
+      ),
+      { params: Promise.resolve({ id: "campaign-1" }) },
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/campaigns/campaign-1/posts?page=2&limit=20&status=pending",
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({ Authorization: "Bearer jwt-value" }),
+      }),
+    );
+    expect(await response.json()).toEqual(payload);
   });
 
   it("forwards GET /campaigns/:id with the route id", async () => {
@@ -166,6 +190,14 @@ describe("Campaigns BFF routes", () => {
             method: "PATCH",
             body: JSON.stringify({ active: false }),
           }),
+          { params: Promise.resolve({ id: "campaign-1" }) },
+        ),
+    ],
+    [
+      "list posts",
+      () =>
+        listCampaignPosts(
+          new Request("http://localhost/api/campaigns/campaign-1/posts"),
           { params: Promise.resolve({ id: "campaign-1" }) },
         ),
     ],
