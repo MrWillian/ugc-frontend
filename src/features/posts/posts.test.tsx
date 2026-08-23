@@ -87,7 +87,7 @@ function makeDetail(
         postId: "post-1",
         decision: "APPROVED",
         rejectionReasons: null,
-        createdAt: "2026-08-11T10:00:00.000Z",
+        moderatedAt: "2026-08-11T10:00:00.000Z",
       },
     ],
     ...overrides,
@@ -516,7 +516,7 @@ describe("PostDetail", () => {
                 postId: "post-1",
                 decision: "REJECTED",
                 rejectionReasons: "Fora do briefing",
-                createdAt: "2026-08-11T10:00:00.000Z",
+                moderatedAt: "2026-08-11T10:00:00.000Z",
               },
             ],
           }),
@@ -530,6 +530,14 @@ describe("PostDetail", () => {
     expect(await screen.findByText("Histórico de moderação")).toBeInTheDocument();
     expect(screen.getAllByText("Rejeitado").length).toBeGreaterThan(0);
     expect(screen.getByText("Fora do briefing")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(new Date("2026-08-11T10:00:00.000Z")),
+      ),
+    ).toBeInTheDocument();
   });
 
   it("shows the consent link when approved and rights are pending", async () => {

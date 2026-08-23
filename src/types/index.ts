@@ -183,10 +183,10 @@ export interface CollectedPost {
 
 export interface ModerationResult {
   id: string;
-  postId: string;
+  postId?: string;
   decision: "APPROVED" | "REJECTED" | string;
   rejectionReasons?: string | null;
-  createdAt: string;
+  moderatedAt: string;
   [key: string]: unknown;
 }
 
