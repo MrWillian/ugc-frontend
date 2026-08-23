@@ -9,8 +9,11 @@ vi.mock("next/headers", () => ({
 }));
 
 import { GET as listPosts } from "@/app/api/posts/route";
+import { GET as getPost } from "@/app/api/posts/[id]/route";
+import { GET as getConsentStatus } from "@/app/api/posts/[id]/consent/status/route";
 import { POST as approvePost } from "@/app/api/posts/[id]/approve/route";
 import { POST as rejectPost } from "@/app/api/posts/[id]/reject/route";
+import { POST as resendConsent } from "@/app/api/consent/resend/[permissionId]/route";
 
 const approvedPost = {
   id: "post-1",
@@ -152,6 +155,134 @@ describe("Posts moderation BFF routes", () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({
       message: "rejection_reasons should not be empty",
+    });
+  });
+
+  it("forwards GET /posts/:id with Bearer", async () => {
+    cookieSpies.get.mockReturnValue({ value: "jwt-value" });
+    const payload = {
+      id: "post-1",
+      caption: "Caption completo",
+      moderationResults: [{ id: "mod-1", decision: "APPROVED" }],
+    };
+    const fetchMock = vi.fn().mockResolvedValueOnce(Response.json(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await getPost(new Request("http://localhost/api/posts/post-1"), {
+      params: Promise.resolve({ id: "post-1" }),
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/posts/post-1",
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({ Authorization: "Bearer jwt-value" }),
+      }),
+    );
+    expect(await response.json()).toEqual(payload);
+  });
+
+  it("forwards GET /posts/:id/consent/status with Bearer", async () => {
+    cookieSpies.get.mockReturnValue({ value: "jwt-value" });
+    const payload = {
+      postId: "post-1",
+      rightsStatus: "PENDING",
+      displayStatus: "HIDDEN",
+      permission: {
+        id: "perm-1",
+        consentUrl: "https://api.test/consent?token=abc",
+      },
+    };
+    const fetchMock = vi.fn().mockResolvedValueOnce(Response.json(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await getConsentStatus(
+      new Request("http://localhost/api/posts/post-1/consent/status"),
+      { params: Promise.resolve({ id: "post-1" }) },
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/posts/post-1/consent/status",
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({ Authorization: "Bearer jwt-value" }),
+      }),
+    );
+    expect(await response.json()).toEqual(payload);
+  });
+
+  it("forwards POST /consent/resend/:permissionId with Bearer", async () => {
+    cookieSpies.get.mockReturnValue({ value: "jwt-value" });
+    const payload = { ok: true };
+    const fetchMock = vi.fn().mockResolvedValueOnce(Response.json(payload));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await resendConsent(
+      new Request("http://localhost/api/consent/resend/perm-1", { method: "POST" }),
+      { params: Promise.resolve({ permissionId: "perm-1" }) },
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/consent/resend/perm-1",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ Authorization: "Bearer jwt-value" }),
+      }),
+    );
+    expect(await response.json()).toEqual(payload);
+  });
+
+  it.each([
+    [
+      "post detail",
+      () =>
+        getPost(new Request("http://localhost/api/posts/post-1"), {
+          params: Promise.resolve({ id: "post-1" }),
+        }),
+    ],
+    [
+      "consent status",
+      () =>
+        getConsentStatus(new Request("http://localhost/api/posts/post-1/consent/status"), {
+          params: Promise.resolve({ id: "post-1" }),
+        }),
+    ],
+    [
+      "consent resend",
+      () =>
+        resendConsent(
+          new Request("http://localhost/api/consent/resend/perm-1", { method: "POST" }),
+          { params: Promise.resolve({ permissionId: "perm-1" }) },
+        ),
+    ],
+  ])("rejects %s without an access-token cookie", async (_route, requestRoute) => {
+    cookieSpies.get.mockReturnValue(undefined);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await requestRoute();
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ message: "Não autenticado." });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("preserves a backend 403 on GET /posts/:id", async () => {
+    cookieSpies.get.mockReturnValue({ value: "jwt-value" });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(
+        Response.json({ message: "Você não tem permissão para ver este post." }, { status: 403 }),
+      ),
+    );
+
+    const response = await getPost(new Request("http://localhost/api/posts/post-1"), {
+      params: Promise.resolve({ id: "post-1" }),
+    });
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      message: "Você não tem permissão para ver este post.",
     });
   });
 });
