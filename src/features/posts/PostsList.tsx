@@ -135,9 +135,14 @@ export function PostsList(): JSX.Element {
     <section>
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Posts</h1>
-        <Link className="text-primary underline" href="/campaigns">
-          Voltar às campanhas
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link className="text-primary underline" href="/moderation">
+            Fila de moderação
+          </Link>
+          <Link className="text-primary underline" href="/campaigns">
+            Voltar às campanhas
+          </Link>
+        </div>
       </div>
       <form
         className="mb-6 grid gap-4 sm:grid-cols-3"
