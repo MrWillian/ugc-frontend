@@ -183,7 +183,7 @@ export function PostDetail({ postId }: { postId: string }): JSX.Element {
               <li key={result.id} className="rounded border p-3 text-sm">
                 <p>{moderationLabel(result.decision as ModerationStatus)}</p>
                 {result.rejectionReasons ? <p>{result.rejectionReasons}</p> : null}
-                <p className="text-muted-foreground">{formatDate(result.createdAt)}</p>
+                <p className="text-muted-foreground">{formatDate(result.moderatedAt)}</p>
               </li>
             ))}
           </ul>

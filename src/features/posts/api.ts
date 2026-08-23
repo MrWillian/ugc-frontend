@@ -129,6 +129,34 @@ export async function resendConsent(permissionId: string): Promise<void> {
   }
 }
 
+export async function moderatePostsBatch(
+  ids: string[],
+  action: "approve" | "reject",
+  body?: RejectPostBody,
+): Promise<void> {
+  const results = await Promise.allSettled(
+    ids.map((id) =>
+      action === "approve" ? approvePost(id) : rejectPost(id, body as RejectPostBody),
+    ),
+  );
+  const failed = results.filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+
+  if (failed.length === 0) return;
+
+  if (failed.length === results.length) {
+    const reason = failed[0]?.reason;
+    throw reason instanceof Error
+      ? reason
+      : new Error("Não foi possível concluir a solicitação.");
+  }
+
+  throw new Error(
+    `${failed.length} de ${ids.length} posts não puderam ser moderados.`,
+  );
+}
+
 export function isPostListStatus(value: string | null): value is PostListStatusQuery {
   return value === "pending" || value === "approved" || value === "rejected";
 }

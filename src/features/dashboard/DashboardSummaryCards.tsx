@@ -12,7 +12,7 @@ export function DashboardSummaryCards(
   const metrics = [
     { href: "/campaigns", label: "Campanhas ativas", value: props.activeCampaigns },
     {
-      href: "/posts?status=pending",
+      href: "/moderation",
       label: "Pendentes de moderação",
       value: props.pendingPosts,
     },
