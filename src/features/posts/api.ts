@@ -1,6 +1,8 @@
 import type {
   ApprovePostResponse,
   CollectedPost,
+  CollectedPostDetail,
+  ConsentStatusResult,
   ModerationQuery,
   PaginatedResponse,
   PostListStatusQuery,
@@ -88,6 +90,43 @@ export async function rejectPost(
   }
 
   return response.json() as Promise<CollectedPost>;
+}
+
+export async function fetchPost(id: string): Promise<CollectedPostDetail> {
+  const response = await fetch(`/api/posts/${id}`, {
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    throw new Error(await responseMessage(response));
+  }
+
+  return response.json() as Promise<CollectedPostDetail>;
+}
+
+export async function fetchConsentStatus(
+  postId: string,
+): Promise<ConsentStatusResult> {
+  const response = await fetch(`/api/posts/${postId}/consent/status`, {
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    throw new Error(await responseMessage(response));
+  }
+
+  return response.json() as Promise<ConsentStatusResult>;
+}
+
+export async function resendConsent(permissionId: string): Promise<void> {
+  const response = await fetch(`/api/consent/resend/${permissionId}`, {
+    method: "POST",
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    throw new Error(await responseMessage(response));
+  }
 }
 
 export function isPostListStatus(value: string | null): value is PostListStatusQuery {

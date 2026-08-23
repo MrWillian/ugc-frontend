@@ -28,8 +28,8 @@ describe("proxy", () => {
     expect(response.headers.get("location")).toBe("http://localhost/login");
   });
 
-  it("redirects a missing-cookie posts request to login", () => {
-    const response = proxy(new NextRequest("http://localhost/posts"));
+  it("redirects a missing-cookie nested posts request to login", () => {
+    const response = proxy(new NextRequest("http://localhost/posts/post-1"));
 
     expect(response.headers.get("location")).toBe("http://localhost/login");
   });
