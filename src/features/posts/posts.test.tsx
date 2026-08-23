@@ -2,8 +2,15 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { PostDetail } from "@/features/posts/PostDetail";
 import { PostsList } from "@/features/posts/PostsList";
-import type { Campaign, CollectedPost, PaginatedResponse } from "@/types";
+import type {
+  Campaign,
+  CollectedPost,
+  CollectedPostDetail,
+  ConsentStatusResult,
+  PaginatedResponse,
+} from "@/types";
 
 const navigationMocks = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -36,8 +43,11 @@ function makePost(overrides: Partial<CollectedPost> = {}): CollectedPost {
     contentUrl: "https://cdn.example/full.jpg",
     thumbnailUrl: "https://cdn.example/thumb.jpg",
     caption: "Praia no verão com o produto",
-    authorData: { username: "ana.ugc" },
-    metrics: null,
+    authorData: {
+      username: "ana.ugc",
+      profilePictureUrl: "https://cdn.example/ana.jpg",
+    },
+    metrics: { likes: 12, comments: 3, shares: 1 },
     postedAt: "2026-08-10T15:30:00.000Z",
     status: "PENDING",
     rightsStatus: "PENDING",
@@ -62,10 +72,61 @@ function jsonResponse(body: unknown, init?: ResponseInit): Response {
   return Response.json(body, init);
 }
 
+function makeDetail(
+  overrides: Partial<CollectedPostDetail> = {},
+): CollectedPostDetail {
+  return {
+    ...makePost({
+      status: "APPROVED",
+      rightsStatus: "PENDING",
+      displayStatus: "HIDDEN",
+    }),
+    moderationResults: [
+      {
+        id: "mod-1",
+        postId: "post-1",
+        decision: "APPROVED",
+        rejectionReasons: null,
+        createdAt: "2026-08-11T10:00:00.000Z",
+      },
+    ],
+    ...overrides,
+  };
+}
+
+function makeConsent(
+  overrides: Partial<ConsentStatusResult> = {},
+): ConsentStatusResult {
+  return {
+    postId: "post-1",
+    rightsStatus: "PENDING",
+    displayStatus: "HIDDEN",
+    permission: {
+      id: "perm-1",
+      channel: "EMAIL",
+      status: "pending",
+      consentUrl: "https://api.test/consent?token=abc",
+      approvedAt: null,
+      rejectedAt: null,
+      attemptCount: 1,
+      lastAttemptAt: "2026-08-11T10:00:00.000Z",
+    },
+    ...overrides,
+  };
+}
+
 function renderList() {
   return render(
     <QueryProvider>
       <PostsList />
+    </QueryProvider>,
+  );
+}
+
+function renderDetail(postId = "post-1") {
+  return render(
+    <QueryProvider>
+      <PostDetail postId={postId} />
     </QueryProvider>,
   );
 }
@@ -119,6 +180,10 @@ describe("PostsList", () => {
     expect(within(row).getByText("Pendente")).toBeInTheDocument();
     expect(within(row).getByRole("button", { name: "Aprovar" })).toHaveClass("cursor-pointer");
     expect(within(row).getByRole("button", { name: "Rejeitar" })).toHaveClass("cursor-pointer");
+    expect(within(row).getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
+      "href",
+      "/posts/post-1",
+    );
 
     expect(fetchMock).toHaveBeenCalledWith("/api/posts?page=1&limit=20", {
       credentials: "same-origin",
@@ -385,5 +450,186 @@ describe("PostsList", () => {
     expect(await screen.findByRole("alert", {}, { timeout: 3_000 })).toHaveTextContent(
       "Falha ao carregar posts.",
     );
+  });
+});
+
+describe("PostDetail", () => {
+  const fetchMock = vi.fn<typeof fetch>();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("renders post details from GET /api/posts/:id", async () => {
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/posts/post-1") return jsonResponse(makeDetail());
+      if (url === "/api/posts/post-1/consent/status") return jsonResponse(makeConsent());
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    renderDetail();
+
+    expect(await screen.findByRole("heading", { name: "Detalhes do post" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voltar aos posts" })).toHaveAttribute("href", "/posts");
+    expect(screen.getByRole("img", { name: "Praia no verão com o produto" })).toHaveAttribute(
+      "src",
+      "https://cdn.example/full.jpg",
+    );
+    expect(screen.getByText("Praia no verão com o produto")).toBeInTheDocument();
+    expect(screen.getByText("ana.ugc")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "ana.ugc" })).toHaveAttribute(
+      "src",
+      "https://cdn.example/ana.jpg",
+    );
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("Curtidas")).toBeInTheDocument();
+    expect(screen.getByText("Comentários")).toBeInTheDocument();
+    expect(screen.getByText("Compartilhamentos")).toBeInTheDocument();
+    expect(screen.getAllByText("Aprovado").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Direitos: pendente/i)).toBeInTheDocument();
+    expect(screen.getByText(/Exibição: oculto/i)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/posts/post-1", {
+      credentials: "same-origin",
+    });
+  });
+
+  it("shows moderation history when present", async () => {
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/posts/post-1") {
+        return jsonResponse(
+          makeDetail({
+            status: "REJECTED",
+            rightsStatus: "REJECTED",
+            moderationResults: [
+              {
+                id: "mod-1",
+                postId: "post-1",
+                decision: "REJECTED",
+                rejectionReasons: "Fora do briefing",
+                createdAt: "2026-08-11T10:00:00.000Z",
+              },
+            ],
+          }),
+        );
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    renderDetail();
+
+    expect(await screen.findByText("Histórico de moderação")).toBeInTheDocument();
+    expect(screen.getAllByText("Rejeitado").length).toBeGreaterThan(0);
+    expect(screen.getByText("Fora do briefing")).toBeInTheDocument();
+  });
+
+  it("shows the consent link when approved and rights are pending", async () => {
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/posts/post-1") return jsonResponse(makeDetail());
+      if (url === "/api/posts/post-1/consent/status") return jsonResponse(makeConsent());
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    renderDetail();
+
+    const consentLink = await screen.findByRole("link", {
+      name: "https://api.test/consent?token=abc",
+    });
+    expect(consentLink).toHaveAttribute("href", "https://api.test/consent?token=abc");
+    expect(screen.getByRole("button", { name: "Copiar link" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reenviar e-mail de consentimento" }),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/posts/post-1/consent/status", {
+      credentials: "same-origin",
+    });
+  });
+
+  it("does not show the consent link when rights are already granted", async () => {
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/posts/post-1") {
+        return jsonResponse(
+          makeDetail({
+            rightsStatus: "GRANTED",
+            displayStatus: "VISIBLE",
+            moderationResults: [],
+          }),
+        );
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    renderDetail();
+
+    expect(await screen.findByText("Aprovado")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copiar link" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Reenviar e-mail de consentimento" }),
+    ).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/posts/post-1/consent/status",
+      expect.anything(),
+    );
+  });
+
+  it("resends the consent email for the permission id", async () => {
+    const user = userEvent.setup();
+    fetchMock.mockImplementation(async (input, init) => {
+      const url = String(input);
+      if (url === "/api/posts/post-1") return jsonResponse(makeDetail());
+      if (url === "/api/posts/post-1/consent/status") return jsonResponse(makeConsent());
+      if (url === "/api/consent/resend/perm-1") {
+        expect(init).toEqual(expect.objectContaining({ method: "POST" }));
+        return jsonResponse({ ok: true });
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    renderDetail();
+    await user.click(
+      await screen.findByRole("button", { name: "Reenviar e-mail de consentimento" }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/consent/resend/perm-1",
+      expect.objectContaining({ method: "POST", credentials: "same-origin" }),
+    );
+    expect(await screen.findByText("E-mail de consentimento reenviado.")).toBeInTheDocument();
+  });
+
+  it("shows an error when the post belongs to another client", async () => {
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/posts/post-1") {
+        return jsonResponse(
+          { message: "Você não tem permissão para ver este post." },
+          { status: 403 },
+        );
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    renderDetail();
+
+    expect(await screen.findByRole("alert", {}, { timeout: 3_000 })).toHaveTextContent(
+      "Você não tem permissão para ver este post.",
+    );
+  });
+
+  it("shows a loading state while the post is fetching", () => {
+    fetchMock.mockImplementation(() => new Promise(() => undefined));
+    renderDetail();
+    expect(screen.getByText("Carregando post...")).toBeInTheDocument();
   });
 });

@@ -150,12 +150,15 @@ export interface UpdateCampaignBody {
 
 export interface AuthorData {
   username?: string;
+  profilePictureUrl?: string;
+  profile_picture_url?: string;
   [key: string]: unknown;
 }
 
 export interface PostMetrics {
   likes?: number;
   comments?: number;
+  shares?: number;
   [key: string]: unknown;
 }
 

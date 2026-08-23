@@ -254,25 +254,33 @@ export function PostsList(): JSX.Element {
                       </TableCell>
                       <TableCell>{formatPostedAt(post.postedAt)}</TableCell>
                       <TableCell>
-                        {post.status === "PENDING" ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Button
-                              disabled={actingId === post.id}
-                              onClick={() => void handleApprove(post.id)}
-                              size="sm"
-                            >
-                              Aprovar
-                            </Button>
-                            <Button
-                              disabled={actingId === post.id}
-                              onClick={() => void handleReject(post.id)}
-                              size="sm"
-                              variant="destructive"
-                            >
-                              Rejeitar
-                            </Button>
-                          </div>
-                        ) : null}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link
+                            className="text-sm text-primary underline"
+                            href={`/posts/${post.id}`}
+                          >
+                            Ver detalhes
+                          </Link>
+                          {post.status === "PENDING" ? (
+                            <>
+                              <Button
+                                disabled={actingId === post.id}
+                                onClick={() => void handleApprove(post.id)}
+                                size="sm"
+                              >
+                                Aprovar
+                              </Button>
+                              <Button
+                                disabled={actingId === post.id}
+                                onClick={() => void handleReject(post.id)}
+                                size="sm"
+                                variant="destructive"
+                              >
+                                Rejeitar
+                              </Button>
+                            </>
+                          ) : null}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
