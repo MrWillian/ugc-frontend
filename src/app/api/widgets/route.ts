@@ -1,30 +1,37 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import {
-  ACCESS_TOKEN_COOKIE,
-  backendErrorMessage,
-  backendRequest,
-} from "@/lib/auth-server";
+import type { CreateWidgetBody, WidgetLayout } from "@/types";
+import { forwardWidgets, requireAccessToken } from "./bff";
+
+const LAYOUTS: WidgetLayout[] = ["GRID", "CAROUSEL", "MASONRY"];
+
+function pickCreateBody(input: CreateWidgetBody): CreateWidgetBody {
+  const body: CreateWidgetBody = { name: input.name };
+  if (input.layout && LAYOUTS.includes(input.layout)) {
+    body.layout = input.layout;
+  }
+  if (
+    input.filters &&
+    typeof input.filters === "object" &&
+    !Array.isArray(input.filters)
+  ) {
+    body.filters = input.filters;
+  }
+  return body;
+}
 
 export async function GET() {
-  const token = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
-  if (!token) {
-    return NextResponse.json({ message: "Não autenticado." }, { status: 401 });
-  }
+  const auth = await requireAccessToken();
+  if (!auth.ok) return auth.response;
 
-  const backendResponse = await backendRequest(
-    "/widgets",
-    { method: "GET" },
-    token,
-  );
-  const payload: unknown = await backendResponse.json();
+  return forwardWidgets(auth.token, "/widgets", { method: "GET" });
+}
 
-  if (!backendResponse.ok) {
-    return NextResponse.json(
-      { message: backendErrorMessage(payload) },
-      { status: backendResponse.status },
-    );
-  }
+export async function POST(request: Request) {
+  const auth = await requireAccessToken();
+  if (!auth.ok) return auth.response;
 
-  return NextResponse.json(payload);
+  const body = pickCreateBody((await request.json()) as CreateWidgetBody);
+  return forwardWidgets(auth.token, "/widgets", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
