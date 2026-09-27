@@ -16,7 +16,7 @@ export function DashboardSummaryCards(
       label: "Pendentes de moderação",
       value: props.pendingPosts,
     },
-    { href: undefined, label: "Widgets", value: props.widgets },
+    { href: "/widgets", label: "Widgets", value: props.widgets },
   ];
 
   return (

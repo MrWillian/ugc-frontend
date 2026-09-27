@@ -63,7 +63,10 @@ describe("dashboard summary", () => {
       "href",
       "/moderation",
     );
-    expect(screen.getByText("Widgets")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Widgets" })).toHaveAttribute(
+      "href",
+      "/widgets",
+    );
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
