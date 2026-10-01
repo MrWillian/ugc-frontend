@@ -53,6 +53,20 @@ describe("auth schemas", () => {
       ]),
     );
   });
+
+  it("rejects signup password without a special character", () => {
+    const result = signupSchema.safeParse({
+      name: "Maria",
+      email: "a@b.com",
+      password: "password123",
+      subdomain: "loja",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      "A senha deve ter ao menos 1 caractere especial.",
+    );
+  });
 });
 
 describe("auth forms", () => {
@@ -81,10 +95,10 @@ describe("auth forms", () => {
     render(<LoginForm />);
 
     await user.type(screen.getByLabelText("E-mail"), "a@b.com");
-    await user.type(screen.getByLabelText("Senha"), "password123");
+    await user.type(screen.getByLabelText("Senha"), "password123!");
     await user.click(screen.getByRole("button", { name: "Entrar" }));
 
-    expect(auth.login).toHaveBeenCalledWith("a@b.com", "password123");
+    expect(auth.login).toHaveBeenCalledWith("a@b.com", "password123!");
     expect(replace).toHaveBeenCalledWith("/dashboard");
   });
 
@@ -93,16 +107,21 @@ describe("auth forms", () => {
     auth.signup.mockResolvedValueOnce();
     render(<SignupForm />);
 
-    await user.type(screen.getByLabelText("Nome"), "Acme");
-    await user.type(screen.getByLabelText("E-mail"), "a@b.com");
-    await user.type(screen.getByLabelText("Senha"), "password123");
-    await user.type(screen.getByLabelText("Subdomínio"), "acme");
-    await user.click(screen.getByRole("button", { name: "Criar conta" }));
+    await user.type(screen.getByLabelText("Nome da empresa"), "acme");
+    await user.type(screen.getByLabelText("Seu nome"), "Acme");
+    await user.type(screen.getByLabelText("E-mail corporativo"), "a@b.com");
+    await user.type(screen.getByLabelText("Senha"), "password123!");
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /Li e aceito/i,
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: "Criar conta grátis" }));
 
     expect(auth.signup).toHaveBeenCalledWith(
       "Acme",
       "a@b.com",
-      "password123",
+      "password123!",
       "acme",
     );
     expect(replace).toHaveBeenCalledWith("/dashboard");
@@ -114,7 +133,7 @@ describe("auth forms", () => {
     render(<LoginForm />);
 
     await user.type(screen.getByLabelText("E-mail"), "a@b.com");
-    await user.type(screen.getByLabelText("Senha"), "password123");
+    await user.type(screen.getByLabelText("Senha"), "password123!");
     await user.click(screen.getByRole("button", { name: "Entrar" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(

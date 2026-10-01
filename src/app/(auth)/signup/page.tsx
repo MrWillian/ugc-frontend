@@ -1,24 +1,38 @@
 import Link from "next/link";
+import { Lock } from "lucide-react";
+import { AuthSplitLayout } from "@/components/layout/AuthSplitLayout";
 import { SignupForm } from "@/features/auth/components/SignupForm";
 
 export default function SignupPage() {
   return (
-    <>
-      <section className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold">Criar conta</h1>
+    <AuthSplitLayout
+      bullets={[
+        "Coleta automática do Instagram",
+        "Solicitação de direitos automatizada",
+        "Widgets prontos para conversão",
+      ]}
+      headline="Comece em menos de 2 minutos!"
+      subline="Teste grátis. Cancele a qualquer momento."
+    >
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-semibold">Criar sua conta</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Comece a organizar seu conteúdo gerado por usuários.
+          Experimente 14 dias grátis. Sem compromisso.
         </p>
-        <div className="mt-6">
-          <SignupForm />
-        </div>
+      </div>
+      <section className="rounded-xl border bg-card p-8 shadow-sm">
+        <SignupForm />
         <p className="mt-6 text-center text-sm">
           Já tem conta?{" "}
-          <Link className="text-primary underline" href="/login">
+          <Link className="font-medium text-primary hover:underline" href="/login">
             Entrar
           </Link>
         </p>
+        <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <Lock aria-hidden className="size-3.5" />
+          Você poderá cancelar a qualquer momento.
+        </p>
       </section>
-    </>
+    </AuthSplitLayout>
   );
 }
