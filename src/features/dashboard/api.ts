@@ -37,6 +37,26 @@ export async function fetchPendingPostsMeta(): Promise<
   return response.json() as Promise<PaginatedResponse<CollectedPost>>;
 }
 
+export async function fetchAllPostsMeta(): Promise<
+  PaginatedResponse<CollectedPost>
+> {
+  const response = await fetch("/api/posts?limit=1", {
+    credentials: "same-origin",
+  });
+  if (!response.ok) throw new Error(await readError(response));
+  return response.json() as Promise<PaginatedResponse<CollectedPost>>;
+}
+
+export async function fetchApprovedPostsMeta(): Promise<
+  PaginatedResponse<CollectedPost>
+> {
+  const response = await fetch("/api/posts?status=approved&limit=1", {
+    credentials: "same-origin",
+  });
+  if (!response.ok) throw new Error(await readError(response));
+  return response.json() as Promise<PaginatedResponse<CollectedPost>>;
+}
+
 export async function fetchWidgets(): Promise<Widget[]> {
   const response = await fetch("/api/widgets", {
     credentials: "same-origin",

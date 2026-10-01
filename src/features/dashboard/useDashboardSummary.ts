@@ -3,15 +3,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  fetchCampaigns,
+  fetchAllPostsMeta,
+  fetchApprovedPostsMeta,
   fetchPendingPostsMeta,
   fetchWidgets,
 } from "@/features/dashboard/api";
+import { fetchPostSample, POST_SAMPLE_CAP } from "@/features/dashboard/post-sample";
+import { countCreatedToday } from "@/features/dashboard/bucket-posts-by-day";
 
 export interface DashboardSummary {
-  activeCampaigns: number;
+  totalPosts: number;
   pendingPosts: number;
+  approvedPosts: number;
   widgets: number;
+  todayCollected: number | null;
+  todayPending: number | null;
+  todayApproved: number | null;
   isLoading: boolean;
   isError: boolean;
   isFetching: boolean;
@@ -20,41 +27,66 @@ export interface DashboardSummary {
 }
 
 export function useDashboardSummary(): DashboardSummary {
-  const campaignsQuery = useQuery({
-    queryKey: ["campaigns"],
-    queryFn: fetchCampaigns,
+  const allQuery = useQuery({
+    queryKey: ["posts", { scope: "all-meta" }],
+    queryFn: fetchAllPostsMeta,
   });
   const pendingQuery = useQuery({
     queryKey: ["posts", { status: "pending" }],
     queryFn: fetchPendingPostsMeta,
   });
+  const approvedQuery = useQuery({
+    queryKey: ["posts", { status: "approved" }],
+    queryFn: fetchApprovedPostsMeta,
+  });
   const widgetsQuery = useQuery({
     queryKey: ["widgets"],
     queryFn: fetchWidgets,
   });
+  const sampleQuery = useQuery({
+    queryKey: ["posts", { scope: "dashboard-sample" }],
+    queryFn: () => fetchPostSample(POST_SAMPLE_CAP),
+  });
 
   const firstError =
-    campaignsQuery.error ?? pendingQuery.error ?? widgetsQuery.error;
+    allQuery.error ??
+    pendingQuery.error ??
+    approvedQuery.error ??
+    widgetsQuery.error;
   const [retryError, setRetryError] = useState<unknown>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const isFetching =
     isRetrying ||
-    campaignsQuery.isFetching ||
+    allQuery.isFetching ||
     pendingQuery.isFetching ||
+    approvedQuery.isFetching ||
     widgetsQuery.isFetching;
   const displayedError = firstError ?? (isRetrying ? retryError : null);
-  const campaigns = Array.isArray(campaignsQuery.data)
-    ? campaignsQuery.data
-    : [];
   const widgets = Array.isArray(widgetsQuery.data) ? widgetsQuery.data : [];
+  const sample = sampleQuery.data ?? [];
+  const sampleCapped = sample.length >= POST_SAMPLE_CAP;
+
+  function todaySubtext(count: number): number | null {
+    if (sampleCapped) return null;
+    return count > 0 ? count : null;
+  }
 
   return {
-    activeCampaigns: campaigns.filter((campaign) => campaign.active).length,
+    totalPosts: allQuery.data?.meta?.total ?? 0,
     pendingPosts: pendingQuery.data?.meta?.total ?? 0,
+    approvedPosts: approvedQuery.data?.meta?.total ?? 0,
     widgets: widgets.length,
+    todayCollected: todaySubtext(countCreatedToday(sample)),
+    todayPending: todaySubtext(
+      countCreatedToday(sample, new Date(), (p) => p.status === "PENDING"),
+    ),
+    todayApproved: todaySubtext(
+      countCreatedToday(sample, new Date(), (p) => p.status === "APPROVED"),
+    ),
     isLoading:
-      !campaignsQuery.isFetched ||
+      !allQuery.isFetched ||
       !pendingQuery.isFetched ||
+      !approvedQuery.isFetched ||
       !widgetsQuery.isFetched,
     isError: Boolean(displayedError),
     isFetching,
@@ -68,9 +100,11 @@ export function useDashboardSummary(): DashboardSummary {
       setRetryError(firstError);
       setIsRetrying(true);
       void Promise.all([
-        campaignsQuery.refetch(),
+        allQuery.refetch(),
         pendingQuery.refetch(),
+        approvedQuery.refetch(),
         widgetsQuery.refetch(),
+        sampleQuery.refetch(),
       ]).finally(() => {
         setIsRetrying(false);
       });

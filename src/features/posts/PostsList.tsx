@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { JSX } from "react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/patterns/StatusBadge";
+import { PageHeader } from "@/components/patterns/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +21,6 @@ import { usePostsList } from "@/features/posts/usePostsList";
 import type {
   CollectedPost,
   ModerationQuery,
-  ModerationStatus,
   RightsStatus,
 } from "@/types";
 
@@ -35,20 +35,6 @@ function requestError(reason: unknown): string {
   return reason instanceof Error
     ? reason.message
     : "Não foi possível concluir a solicitação.";
-}
-
-function moderationLabel(status: ModerationStatus): string {
-  if (status === "APPROVED") return "Aprovado";
-  if (status === "REJECTED") return "Rejeitado";
-  return "Pendente";
-}
-
-function moderationVariant(
-  status: ModerationStatus,
-): "default" | "secondary" | "destructive" {
-  if (status === "APPROVED") return "default";
-  if (status === "REJECTED") return "destructive";
-  return "secondary";
 }
 
 function consentLabel(status: RightsStatus): string {
@@ -133,17 +119,20 @@ export function PostsList(): JSX.Element {
 
   return (
     <section>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Posts</h1>
-        <div className="flex flex-wrap items-center gap-4">
-          <Link className="text-primary underline" href="/moderation">
-            Fila de moderação
-          </Link>
-          <Link className="text-primary underline" href="/campaigns">
-            Voltar às campanhas
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        actions={
+          <>
+            <Link className="text-sm font-medium text-primary hover:underline" href="/moderation">
+              Fila de moderação
+            </Link>
+            <Link className="text-sm font-medium text-primary hover:underline" href="/campaigns">
+              Campanhas
+            </Link>
+          </>
+        }
+        description="Posts coletados das suas campanhas."
+        title="Posts"
+      />
       <form
         className="mb-6 grid gap-4 sm:grid-cols-3"
         onSubmit={(event) => event.preventDefault()}
@@ -203,6 +192,7 @@ export function PostsList(): JSX.Element {
         <p>Carregando posts...</p>
       ) : (
         <>
+          <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -247,9 +237,7 @@ export function PostsList(): JSX.Element {
                       <TableCell>{username}</TableCell>
                       <TableCell>
                         <div className="flex flex-col items-start gap-1">
-                          <Badge variant={moderationVariant(post.status)}>
-                            {moderationLabel(post.status)}
-                          </Badge>
+                          <StatusBadge status={post.status} />
                           {post.status === "APPROVED" ? (
                             <span className="text-xs text-muted-foreground">
                               Consentimento: {consentLabel(post.rightsStatus)}
@@ -293,6 +281,7 @@ export function PostsList(): JSX.Element {
               )}
             </TableBody>
           </Table>
+          </div>
           <div className="mt-4 flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
               Página {filters.page ?? 1} de {Math.max(meta?.totalPages ?? 1, 1)}

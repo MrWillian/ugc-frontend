@@ -40,7 +40,7 @@ describe("CampaignsList", () => {
 
     render(<CampaignsList />);
 
-    expect(await screen.findByRole("link", { name: "Nova Campanha" })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: "Nova campanha" })).toHaveAttribute(
       "href",
       "/campaigns/new",
     );

@@ -1,28 +1,60 @@
-import Link from "next/link";
 import type { JSX } from "react";
+import {
+  CheckCircle2,
+  Clock,
+  Images,
+  LayoutGrid,
+} from "lucide-react";
+import { MetricCard } from "@/components/patterns/MetricCard";
 import type { DashboardSummary } from "@/features/dashboard/useDashboardSummary";
+
+function todayLabel(count: number | null): string | undefined {
+  if (count == null) return undefined;
+  return `+${count} hoje`;
+}
 
 export function DashboardSummaryCards(
   props: DashboardSummary,
 ): JSX.Element {
   if (props.isLoading && !props.isError) {
-    return <p className="mt-6">Carregando resumo…</p>;
+    return <p className="text-muted-foreground">Carregando resumo…</p>;
   }
 
   const metrics = [
-    { href: "/campaigns", label: "Campanhas ativas", value: props.activeCampaigns },
+    {
+      href: "/posts",
+      label: "Posts coletados",
+      value: props.totalPosts,
+      subtext: todayLabel(props.todayCollected),
+      icon: <Images className="text-primary" />,
+    },
     {
       href: "/moderation",
-      label: "Pendentes de moderação",
+      label: "Pendentes",
       value: props.pendingPosts,
+      subtext: todayLabel(props.todayPending),
+      icon: <Clock className="text-status-warning" />,
     },
-    { href: "/widgets", label: "Widgets", value: props.widgets },
+    {
+      href: "/posts?status=approved",
+      label: "Aprovados",
+      value: props.approvedPosts,
+      subtext: todayLabel(props.todayApproved),
+      icon: <CheckCircle2 className="text-status-success" />,
+    },
+    {
+      href: "/widgets",
+      label: "Widgets ativos",
+      value: props.widgets,
+      subtext: "—",
+      icon: <LayoutGrid className="text-accent-widgets" />,
+    },
   ];
 
   return (
     <>
       {props.isError && (
-        <div className="mt-6" role="alert">
+        <div className="mb-4" role="alert">
           <p>{props.errorMessage ?? "Não foi possível carregar o resumo."}</p>
           <button
             className="mt-2 font-medium text-primary underline disabled:opacity-50"
@@ -35,36 +67,12 @@ export function DashboardSummaryCards(
         </div>
       )}
       <section
-        className="mt-6 grid gap-4 sm:grid-cols-3"
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
         aria-label="Resumo do dashboard"
       >
-        {metrics.map((metric) => {
-          const content = (
-            <>
-              <p className="text-sm text-muted-foreground">{metric.label}</p>
-              <p className="mt-2 text-2xl font-semibold">{metric.value}</p>
-            </>
-          );
-
-          if (metric.href) {
-            return (
-              <Link
-                aria-label={metric.label}
-                className="rounded-lg border p-4 hover:bg-accent/40"
-                href={metric.href}
-                key={metric.label}
-              >
-                {content}
-              </Link>
-            );
-          }
-
-          return (
-            <div className="rounded-lg border p-4" key={metric.label}>
-              {content}
-            </div>
-          );
-        })}
+        {metrics.map((metric) => (
+          <MetricCard key={metric.label} {...metric} />
+        ))}
       </section>
     </>
   );
