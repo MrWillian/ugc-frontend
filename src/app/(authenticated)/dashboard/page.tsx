@@ -12,11 +12,11 @@ export default function DashboardPage() {
   const summary = useDashboardSummary();
 
   if (isLoading) {
-    return <main className="p-6">Carregando...</main>;
+    return <>Carregando...</>;
   }
 
   return (
-    <main className="p-6">
+    <>
       {user ? (
         <>
           <DashboardHeader name={user.name} plan={user.plan} />
@@ -29,6 +29,6 @@ export default function DashboardPage() {
       ) : (
         <p className="mt-4">Você não está autenticado.</p>
       )}
-    </main>
+    </>
   );
 }

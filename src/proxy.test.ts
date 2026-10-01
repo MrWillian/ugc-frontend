@@ -10,6 +10,7 @@ describe("proxy config", () => {
       "/widgets/:path*",
       "/posts/:path*",
       "/moderation/:path*",
+      "/settings/:path*",
       "/login",
       "/signup",
     ]);
@@ -37,6 +38,12 @@ describe("proxy", () => {
 
   it("redirects a missing-cookie moderation request to login", () => {
     const response = proxy(new NextRequest("http://localhost/moderation"));
+
+    expect(response.headers.get("location")).toBe("http://localhost/login");
+  });
+
+  it("redirects a missing-cookie settings request to login", () => {
+    const response = proxy(new NextRequest("http://localhost/settings"));
 
     expect(response.headers.get("location")).toBe("http://localhost/login");
   });

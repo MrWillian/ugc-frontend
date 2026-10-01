@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth-server";
 
-const protectedPrefixes = ["/dashboard", "/campaigns", "/widgets", "/posts", "/moderation"];
+const protectedPrefixes = [
+  "/dashboard",
+  "/campaigns",
+  "/widgets",
+  "/posts",
+  "/moderation",
+  "/settings",
+];
 const publicPaths = new Set(["/login", "/signup"]);
 
 export function proxy(request: NextRequest) {
@@ -28,6 +35,7 @@ export const config = {
     "/widgets/:path*",
     "/posts/:path*",
     "/moderation/:path*",
+    "/settings/:path*",
     "/login",
     "/signup",
   ],
