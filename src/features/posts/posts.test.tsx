@@ -161,7 +161,7 @@ describe("PostsList", () => {
     renderList();
 
     expect(await screen.findByRole("columnheader", { name: "Thumbnail" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Voltar às campanhas" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Campanhas" })).toHaveAttribute(
       "href",
       "/campaigns",
     );

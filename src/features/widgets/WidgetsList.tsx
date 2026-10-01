@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { JSX } from "react";
+import { PageHeader } from "@/components/patterns/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -22,12 +23,15 @@ export function WidgetsList(): JSX.Element {
 
   return (
     <section>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Widgets</h1>
-        <Button asChild>
-          <Link href="/widgets/new">Novo Widget</Link>
-        </Button>
-      </div>
+      <PageHeader
+        actions={
+          <Button asChild>
+            <Link href="/widgets/new">Novo widget</Link>
+          </Button>
+        }
+        description="Embeds para exibir posts aprovados no seu site."
+        title="Widgets"
+      />
       {query.isError ? (
         <p className="mb-4 text-sm text-destructive" role="alert">
           {query.error instanceof Error
@@ -38,6 +42,7 @@ export function WidgetsList(): JSX.Element {
       {query.isPending ? (
         <p>Carregando widgets...</p>
       ) : (
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -74,6 +79,7 @@ export function WidgetsList(): JSX.Element {
             )}
           </TableBody>
         </Table>
+        </div>
       )}
     </section>
   );

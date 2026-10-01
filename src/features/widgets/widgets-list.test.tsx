@@ -45,7 +45,7 @@ describe("WidgetsList", () => {
     });
     renderList();
 
-    expect(await screen.findByRole("link", { name: "Novo Widget" })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: "Novo widget" })).toHaveAttribute(
       "href",
       "/widgets/new",
     );

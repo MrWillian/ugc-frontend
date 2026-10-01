@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type JSX } from "react";
+import { PageHeader } from "@/components/patterns/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,12 +83,15 @@ export function CampaignsList(): JSX.Element {
 
   return (
     <section>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Campanhas</h1>
-        <Button asChild>
-          <Link href="/campaigns/new">Nova Campanha</Link>
-        </Button>
-      </div>
+      <PageHeader
+        actions={
+          <Button asChild>
+            <Link href="/campaigns/new">Nova campanha</Link>
+          </Button>
+        }
+        description="Configure hashtags e coleta de UGC."
+        title="Campanhas"
+      />
       {error ? (
         <p className="mb-4 text-sm text-destructive" role="alert">
           {error}
@@ -96,6 +100,7 @@ export function CampaignsList(): JSX.Element {
       {isLoading ? (
         <p>Carregando campanhas...</p>
       ) : (
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -147,6 +152,7 @@ export function CampaignsList(): JSX.Element {
             )}
           </TableBody>
         </Table>
+        </div>
       )}
     </section>
   );
