@@ -8,7 +8,10 @@ export const loginSchema = z.object({
 export const signupSchema = z.object({
   name: z.string().trim().min(1, "Informe seu nome."),
   email: z.email("Informe um e-mail válido."),
-  password: z.string().min(8, "A senha deve ter ao menos 8 caracteres."),
+  password: z
+    .string()
+    .min(8, "A senha deve ter ao menos 8 caracteres.")
+    .regex(/[^A-Za-z0-9]/, "A senha deve ter ao menos 1 caractere especial."),
   subdomain: z
     .string()
     .trim()
