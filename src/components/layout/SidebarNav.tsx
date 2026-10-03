@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { mainNavItems } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,13 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarNav({
+  onNavigate,
+  collapsed = false,
+}: {
+  onNavigate?: () => void;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
@@ -22,17 +28,20 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           return (
             <li key={href}>
               <Link
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors",
+                  collapsed ? "justify-center px-2" : "px-3",
                   active
                     ? "border-l-4 border-primary bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                 )}
                 href={href}
+                title={collapsed ? label : undefined}
                 onClick={onNavigate}
               >
                 <Icon aria-hidden className="size-5 shrink-0" />
-                {label}
+                <span className={cn(collapsed && "sr-only")}>{label}</span>
               </Link>
             </li>
           );
@@ -40,12 +49,16 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       </ul>
       <div className="border-t p-3">
         <Link
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          href="/settings#perfil"
+          className={cn(
+            "flex items-center gap-3 rounded-lg py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive",
+            collapsed ? "justify-center px-2" : "px-3",
+          )}
+          href="/logout"
+          title={collapsed ? "Sair" : undefined}
           onClick={onNavigate}
         >
-          <User aria-hidden className="size-5" />
-          Perfil
+          <LogOut aria-hidden className="size-5 shrink-0" />
+          <span className={cn(collapsed && "sr-only")}>Sair</span>
         </Link>
       </div>
     </nav>
