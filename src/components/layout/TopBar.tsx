@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, ChevronDown, LogOut, Menu, Search, Settings, User } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Settings,
+  User,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SocialProofLogo } from "@/components/brand/SocialProofLogo";
@@ -126,7 +136,15 @@ function ProfileMenu({ name, email }: { name: string; email?: string }) {
   );
 }
 
-export function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
+export function TopBar({
+  onOpenMenu,
+  onToggleSidebar,
+  sidebarCollapsed = false,
+}: {
+  onOpenMenu?: () => void;
+  onToggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
+}) {
   const { user } = useAuth();
   const pendingQuery = useQuery({
     queryKey: ["posts", { status: "pending" }],
@@ -146,6 +164,24 @@ export function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
           onClick={onOpenMenu}
         >
           <Menu className="size-5" />
+        </Button>
+      ) : null}
+      {onToggleSidebar ? (
+        <Button
+          aria-label={sidebarCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+          aria-pressed={sidebarCollapsed}
+          className="hidden lg:inline-flex"
+          size="icon"
+          title={sidebarCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+          type="button"
+          variant="ghost"
+          onClick={onToggleSidebar}
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen className="size-5" />
+          ) : (
+            <PanelLeftClose className="size-5" />
+          )}
         </Button>
       ) : null}
       <SocialProofLogo className="lg:hidden" href="/dashboard" variant="dark" />
