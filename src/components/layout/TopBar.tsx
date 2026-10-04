@@ -8,7 +8,6 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
-  Search,
   Settings,
   User,
 } from "lucide-react";
@@ -186,19 +185,6 @@ export function TopBar({
       ) : null}
       <SocialProofLogo className="lg:hidden" href="/dashboard" variant="dark" />
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
-        <div className="relative hidden sm:block">
-          <Search
-            aria-hidden
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            aria-label="Pesquisar"
-            className="h-9 w-48 rounded-lg border bg-muted/50 pl-9 pr-3 text-sm placeholder:text-muted-foreground lg:w-64"
-            disabled
-            placeholder="Em breve"
-            title="Em breve"
-          />
-        </div>
         <Link
           aria-label={
             pendingCount > 0
