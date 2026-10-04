@@ -64,17 +64,22 @@ export function DashboardActivityFeed() {
                 <span className="size-12 shrink-0 rounded-lg bg-muted" />
               )}
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-start justify-between gap-3">
                   <span className="text-sm font-medium">{authorHandle(post)}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatRelative(post.createdAt)}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <time
+                      className="text-xs text-muted-foreground whitespace-nowrap tabular-nums"
+                      dateTime={post.createdAt}
+                    >
+                      {formatRelative(post.createdAt)}
+                    </time>
+                    <StatusBadge status={post.status} />
+                  </div>
                 </div>
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                   {post.caption ?? "Sem legenda"}
                 </p>
               </div>
-              <StatusBadge status={post.status} />
             </Link>
           </li>
         ))}
