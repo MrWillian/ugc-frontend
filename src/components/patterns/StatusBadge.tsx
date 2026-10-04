@@ -16,15 +16,15 @@ export function StatusBadge({
 }) {
   const variant =
     status === "APPROVED"
-      ? "bg-status-success-bg text-status-success"
+      ? "border border-status-success/25 bg-status-success-bg text-status-success"
       : status === "REJECTED"
-        ? "bg-destructive/10 text-destructive"
-        : "bg-status-warning-bg text-status-warning";
+        ? "border border-destructive/30 bg-destructive/15 text-destructive dark:text-red-300"
+        : "border border-status-warning/25 bg-status-warning-bg text-status-warning";
 
   return (
     <span
       className={cn(
-        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex shrink-0 items-center self-center whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium leading-none",
         variant,
         className,
       )}
