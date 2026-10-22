@@ -3,14 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import DashboardPage from "@/app/(authenticated)/dashboard/page";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDashboardSummary } from "@/features/dashboard/useDashboardSummary";
 
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock("@/features/dashboard/useDashboardSummary", () => ({
-  useDashboardSummary: vi.fn(),
+vi.mock("@/features/dashboard/DashboardSummaryCards", () => ({
+  DashboardSummaryCards: () => <section aria-label="Resumo do dashboard" />,
 }));
 
 vi.mock("@/features/dashboard/DashboardChart", () => ({
@@ -51,23 +50,9 @@ describe("DashboardPage", () => {
       signup: vi.fn(),
       logout: vi.fn(),
     });
-    vi.mocked(useDashboardSummary).mockReturnValue({
-      totalPosts: 10,
-      pendingPosts: 2,
-      approvedPosts: 5,
-      widgets: 3,
-      todayCollected: null,
-      todayPending: null,
-      todayApproved: null,
-      isLoading: false,
-      isError: false,
-      errorMessage: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
   });
 
-  it("composes the authenticated dashboard and runs the summary hook", () => {
+  it("composes the authenticated dashboard", () => {
     render(
       <QueryProvider>
         <DashboardPage />
@@ -76,6 +61,5 @@ describe("DashboardPage", () => {
 
     expect(screen.getByRole("heading", { name: /Olá, Acme/i })).toBeInTheDocument();
     expect(screen.getByLabelText("Resumo do dashboard")).toBeInTheDocument();
-    expect(useDashboardSummary).toHaveBeenCalledOnce();
   });
 });

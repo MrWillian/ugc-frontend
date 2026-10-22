@@ -1,3 +1,5 @@
+"use client";
+
 import type { JSX } from "react";
 import {
   CheckCircle2,
@@ -6,16 +8,16 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { MetricCard } from "@/components/patterns/MetricCard";
-import type { DashboardSummary } from "@/features/dashboard/useDashboardSummary";
+import { useDashboardSummary } from "@/features/dashboard/useDashboardSummary";
 
 function todayLabel(count: number | null): string | undefined {
   if (count == null) return undefined;
   return `+${count} hoje`;
 }
 
-export function DashboardSummaryCards(
-  props: DashboardSummary,
-): JSX.Element {
+export function DashboardSummaryCards(): JSX.Element {
+  const props = useDashboardSummary();
+
   if (props.isLoading && !props.isError) {
     return <p className="text-muted-foreground">Carregando resumo…</p>;
   }
