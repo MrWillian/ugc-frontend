@@ -1,31 +1,41 @@
-"use client";
-
-import { useAuth } from "@/contexts/AuthContext";
+import { Suspense } from "react";
 import { PageHeader } from "@/components/patterns/PageHeader";
-import { DashboardActivityFeed } from "@/features/dashboard/DashboardActivityFeed";
+import {
+  DashboardActivityFeed,
+} from "@/features/dashboard/DashboardActivityFeed";
 import { DashboardChart } from "@/features/dashboard/DashboardChart";
 import { DashboardFilterPanel } from "@/features/dashboard/DashboardFilterPanel";
+import {
+  DashboardGreeting,
+  DashboardGreetingSkeleton,
+  DashboardPlan,
+  DashboardPlanSkeleton,
+} from "@/features/dashboard/DashboardGreeting";
 import { DashboardPopularWidget } from "@/features/dashboard/DashboardPopularWidget";
-import { DashboardSummaryCards } from "@/features/dashboard/DashboardSummaryCards";
+import {
+  DashboardSummaryCards,
+  DashboardSummaryCardsSkeleton,
+} from "@/features/dashboard/DashboardSummaryCards";
 
 export default function DashboardPage() {
-  const { isLoading, user } = useAuth();
-
-  if (isLoading) {
-    return <p className="text-muted-foreground">Carregando...</p>;
-  }
-
-  if (!user) {
-    return <p className="text-muted-foreground">Você não está autenticado.</p>;
-  }
-
   return (
     <>
       <PageHeader
-        description={`Plano ${user.plan}`}
-        title={`Olá, ${user.name}`}
+        description={
+          <Suspense fallback={<DashboardPlanSkeleton />}>
+            <DashboardPlan />
+          </Suspense>
+        }
+        testId="dashboard-shell-marker"
+        title={
+          <Suspense fallback={<DashboardGreetingSkeleton />}>
+            <DashboardGreeting />
+          </Suspense>
+        }
       />
-      <DashboardSummaryCards />
+      <Suspense fallback={<DashboardSummaryCardsSkeleton />}>
+        <DashboardSummaryCards />
+      </Suspense>
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <DashboardChart />

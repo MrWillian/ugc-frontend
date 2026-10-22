@@ -6,14 +6,17 @@ export function PageHeader({
   description,
   actions,
   className,
+  testId,
 }: {
-  title: string;
-  description?: string;
+  title: ReactNode;
+  description?: ReactNode;
   actions?: ReactNode;
   className?: string;
+  testId?: string;
 }) {
   return (
     <div
+      data-testid={testId}
       className={cn(
         "mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
         className,

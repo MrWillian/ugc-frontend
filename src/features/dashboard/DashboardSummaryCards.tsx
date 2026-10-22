@@ -15,11 +15,16 @@ function todayLabel(count: number | null): string | undefined {
   return `+${count} hoje`;
 }
 
+/** Also the prerendered fallback, so the shell and the loading state cannot drift. */
+export function DashboardSummaryCardsSkeleton(): JSX.Element {
+  return <p className="text-muted-foreground">Carregando resumo…</p>;
+}
+
 export function DashboardSummaryCards(): JSX.Element {
   const props = useDashboardSummary();
 
   if (props.isLoading && !props.isError) {
-    return <p className="text-muted-foreground">Carregando resumo…</p>;
+    return <DashboardSummaryCardsSkeleton />;
   }
 
   const metrics = [

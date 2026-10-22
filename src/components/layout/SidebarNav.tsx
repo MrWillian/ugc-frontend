@@ -36,6 +36,7 @@ export function SidebarNav({
                     ? "border-l-4 border-primary bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                 )}
+                data-testid={`nav-link-${href.slice(1)}`}
                 href={href}
                 title={collapsed ? label : undefined}
                 onClick={onNavigate}

@@ -3,17 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AppShell } from "./AppShell";
+import { ProfileMenu } from "./ProfileMenu";
 import { SidebarNav } from "./SidebarNav";
 import { TopBar } from "./TopBar";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/posts",
-}));
-
-vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({
-    user: { name: "Ana Souza", email: "ana@acme.test" },
-  }),
 }));
 
 vi.mock("@/features/dashboard/api", () => ({
@@ -66,9 +61,18 @@ describe("TopBar", () => {
     expect(screen.queryByRole("navigation", { name: "Atalhos" })).not.toBeInTheDocument();
   });
 
+  it("renders the profile slot it is given", () => {
+    render(<TopBar profile={<span>slot do perfil</span>} />, {
+      wrapper: QueryProvider,
+    });
+    expect(screen.getByText("slot do perfil")).toBeInTheDocument();
+  });
+});
+
+describe("ProfileMenu", () => {
   it("opens the profile menu with profile and settings items", async () => {
     const user = userEvent.setup();
-    render(<TopBar />, { wrapper: QueryProvider });
+    render(<ProfileMenu email="ana@acme.test" name="Ana Souza" />);
 
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Menu do perfil" }));
