@@ -31,7 +31,14 @@ function useSidebarCollapsed() {
   return [collapsed, toggle] as const;
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  profile,
+}: {
+  children: ReactNode;
+  /** Server-rendered top-bar user chip; see the authenticated layout. */
+  profile?: ReactNode;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
@@ -82,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : null}
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
+          profile={profile}
           sidebarCollapsed={collapsed}
           onOpenMenu={() => setMobileOpen(true)}
           onToggleSidebar={toggleCollapsed}

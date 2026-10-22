@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { DashboardSummaryCards } from "@/features/dashboard/DashboardSummaryCards";
-import { useDashboardSummary } from "@/features/dashboard/useDashboardSummary";
 
 function jsonResponse(body: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body), {
@@ -13,14 +12,10 @@ function jsonResponse(body: unknown, init?: ResponseInit): Response {
   });
 }
 
-function SummaryHarness() {
-  return <DashboardSummaryCards {...useDashboardSummary()} />;
-}
-
 function renderSummary() {
   return render(
     <QueryProvider>
-      <SummaryHarness />
+      <DashboardSummaryCards />
     </QueryProvider>,
   );
 }
