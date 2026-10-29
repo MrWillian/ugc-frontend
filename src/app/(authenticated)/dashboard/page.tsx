@@ -11,6 +11,10 @@ import {
   DashboardPlan,
   DashboardPlanSkeleton,
 } from "@/features/dashboard/DashboardGreeting";
+import {
+  DashboardInstagramCard,
+  DashboardInstagramCardSkeleton,
+} from "@/features/dashboard/DashboardInstagramCard";
 import { DashboardPopularWidget } from "@/features/dashboard/DashboardPopularWidget";
 import {
   DashboardSummaryCards,
@@ -42,6 +46,9 @@ export default function DashboardPage() {
           <DashboardActivityFeed />
         </div>
         <div className="space-y-6">
+          <Suspense fallback={<DashboardInstagramCardSkeleton />}>
+            <DashboardInstagramCard />
+          </Suspense>
           <DashboardPopularWidget />
           <DashboardFilterPanel />
         </div>

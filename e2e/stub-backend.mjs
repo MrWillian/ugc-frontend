@@ -70,6 +70,43 @@ const WIDGETS = [
   },
 ];
 
+const APP_URL = process.env.E2E_APP_URL ?? "http://127.0.0.1:3100";
+export const META_CODE = "e2e-meta-code";
+
+// Flipped by the callback stub, so the OAuth spec observes a real transition.
+let instagramConnected = false;
+
+function instagramStatus() {
+  if (!instagramConnected) {
+    return {
+      connected: false,
+      status: null,
+      accountId: null,
+      accountUsername: null,
+      pageName: null,
+      expiresAt: null,
+      daysUntilExpiry: null,
+      reconnectRequired: false,
+    };
+  }
+  return {
+    connected: true,
+    status: "ACTIVE",
+    accountId: "ig-account-e2e",
+    accountUsername: "acme_studio",
+    pageName: "Acme Studio",
+    expiresAt: new Date(Date.now() + 50 * 86_400_000).toISOString(),
+    daysUntilExpiry: 50,
+    reconnectRequired: false,
+  };
+}
+
+async function readJson(request) {
+  let raw = "";
+  for await (const chunk of request) raw += chunk;
+  return raw ? JSON.parse(raw) : {};
+}
+
 function paginate(url) {
   const status = url.searchParams.get("status");
   const limit = Number(url.searchParams.get("limit") ?? 50);
@@ -139,6 +176,30 @@ const server = createServer(async (request, response) => {
 
   if (url.pathname === "/campaigns") {
     send(200, []);
+    return;
+  }
+
+  if (url.pathname === "/platform/instagram/status") {
+    send(200, instagramStatus());
+    return;
+  }
+
+  if (url.pathname === "/platform/instagram/auth-url" && request.method === "POST") {
+    const callback = new URL("/auth/instagram/callback", APP_URL);
+    callback.searchParams.set("code", META_CODE);
+    callback.searchParams.set("state", TEST_CLIENT.id);
+    send(201, { authUrl: callback.toString(), state: TEST_CLIENT.id });
+    return;
+  }
+
+  if (url.pathname === "/platform/instagram/callback" && request.method === "POST") {
+    const { code, state } = await readJson(request);
+    if (code !== META_CODE || state !== TEST_CLIENT.id) {
+      send(400, { statusCode: 400, message: "Código OAuth inválido." });
+      return;
+    }
+    instagramConnected = true;
+    send(201, instagramStatus());
     return;
   }
 

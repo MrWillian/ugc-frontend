@@ -77,6 +77,63 @@ describe("InstagramConnectionCard", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows the connected page and token expiry date", async () => {
+    fetchMock.mockResolvedValueOnce(
+      Response.json({
+        ...disconnectedStatus,
+        connected: true,
+        status: "ACTIVE",
+        accountUsername: "acme",
+        pageName: "Acme Store",
+        expiresAt: "2026-12-20T12:00:00.000Z",
+        daysUntilExpiry: 53,
+      }),
+    );
+
+    render(<InstagramConnectionCard />);
+
+    expect(await screen.findByText(/Acme Store/)).toBeInTheDocument();
+    expect(screen.getByText(/20\/12\/2026/)).toBeInTheDocument();
+    expect(screen.queryByText(/expira em/i)).not.toBeInTheDocument();
+  });
+
+  it("warns and offers reconnection when the token is about to expire", async () => {
+    fetchMock.mockResolvedValueOnce(
+      Response.json({
+        ...disconnectedStatus,
+        connected: true,
+        status: "ACTIVE",
+        accountUsername: "acme",
+        expiresAt: "2026-11-02T12:00:00.000Z",
+        daysUntilExpiry: 5,
+      }),
+    );
+
+    render(<InstagramConnectionCard />);
+
+    expect(await screen.findByText(/expira em 5 dias/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reconectar Instagram" }),
+    ).toBeInTheDocument();
+  });
+
+  it("confirms a just-completed connection", async () => {
+    fetchMock.mockResolvedValueOnce(
+      Response.json({
+        ...disconnectedStatus,
+        connected: true,
+        status: "ACTIVE",
+        accountUsername: "acme",
+      }),
+    );
+
+    render(<InstagramConnectionCard justConnected />);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Instagram conectado com sucesso.",
+    );
+  });
+
   it("shows a reconnect action when the connection requires reconnection", async () => {
     fetchMock.mockResolvedValueOnce(
       Response.json({
