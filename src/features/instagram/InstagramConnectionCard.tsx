@@ -2,17 +2,9 @@
 
 import { useEffect, useState, type JSX } from "react";
 import { Button } from "@/components/ui/button";
+import type { InstagramStatus } from "@/types";
 
-interface InstagramStatus {
-  connected: boolean;
-  status: "ACTIVE" | "EXPIRED" | "REVOKED" | null;
-  accountId: string | null;
-  accountUsername: string | null;
-  pageName: string | null;
-  expiresAt: string | null;
-  daysUntilExpiry: number | null;
-  reconnectRequired: boolean;
-}
+const EXPIRY_WARNING_DAYS = 7;
 
 async function responseMessage(response: Response): Promise<string> {
   const payload: unknown = await response.json().catch(() => null);
@@ -29,7 +21,22 @@ async function responseMessage(response: Response): Promise<string> {
   return "Não foi possível concluir a solicitação.";
 }
 
-export function InstagramConnectionCard(): JSX.Element {
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(
+    new Date(iso),
+  );
+}
+
+function expiryWarning(days: number): string {
+  if (days <= 0) return "A conexão expira hoje.";
+  return `A conexão expira em ${days} ${days === 1 ? "dia" : "dias"}.`;
+}
+
+export function InstagramConnectionCard({
+  justConnected = false,
+}: {
+  justConnected?: boolean;
+}): JSX.Element {
   const [status, setStatus] = useState<InstagramStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [reloadVersion, setReloadVersion] = useState(0);
@@ -77,6 +84,7 @@ export function InstagramConnectionCard(): JSX.Element {
     status?.reconnectRequired ||
     status?.status === "EXPIRED" ||
     status?.status === "REVOKED";
+  const daysUntilExpiry = status?.daysUntilExpiry;
 
   async function startConnection() {
     setError("");
@@ -107,30 +115,72 @@ export function InstagramConnectionCard(): JSX.Element {
   }
 
   return (
-    <section className="mt-6 rounded-lg border p-4" aria-labelledby="instagram-heading">
-      <h2 id="instagram-heading" className="text-lg font-semibold">
-        Instagram
-      </h2>
-      {error && <p className="mt-2 text-destructive" role="alert">{error}</p>}
-      {isLoading ? (
-        <p className="mt-2">Carregando conexão do Instagram...</p>
-      ) : !status ? (
-        <Button className="mt-4" onClick={retryStatus}>
-          Tentar novamente
-        </Button>
-      ) : needsReconnect ? (
-        <Button className="mt-4" onClick={() => void startConnection()}>
-          Reconectar Instagram
-        </Button>
-      ) : status.connected ? (
-        <p className="mt-2">
-          Conectado como {status.accountUsername ? `@${status.accountUsername}` : "Instagram"}
+    <div className="space-y-3 text-sm">
+      {justConnected && status?.connected && !needsReconnect ? (
+        <p className="font-medium text-status-success" role="status">
+          Instagram conectado com sucesso.
         </p>
+      ) : null}
+      {error && <p className="text-destructive" role="alert">{error}</p>}
+      {isLoading ? (
+        <p className="text-muted-foreground">Carregando conexão do Instagram...</p>
+      ) : !status ? (
+        <Button onClick={retryStatus}>Tentar novamente</Button>
+      ) : needsReconnect ? (
+        <>
+          <p className="text-muted-foreground">
+            A conexão com o Instagram expirou ou foi revogada. Reconecte para
+            continuar coletando posts.
+          </p>
+          <Button onClick={() => void startConnection()}>
+            Reconectar Instagram
+          </Button>
+        </>
+      ) : status.connected ? (
+        <>
+          <dl className="space-y-2">
+            <div>
+              <dt className="text-muted-foreground">Conta</dt>
+              <dd className="font-medium">
+                Conectado como{" "}
+                {status.accountUsername ? `@${status.accountUsername}` : "Instagram"}
+              </dd>
+            </div>
+            {status.pageName ? (
+              <div>
+                <dt className="text-muted-foreground">Página</dt>
+                <dd className="font-medium">{status.pageName}</dd>
+              </div>
+            ) : null}
+            {status.expiresAt ? (
+              <div>
+                <dt className="text-muted-foreground">Conexão válida até</dt>
+                <dd className="font-medium">{formatDate(status.expiresAt)}</dd>
+              </div>
+            ) : null}
+          </dl>
+          {typeof daysUntilExpiry === "number" &&
+          daysUntilExpiry <= EXPIRY_WARNING_DAYS ? (
+            <>
+              <p className="text-status-warning">
+                {expiryWarning(daysUntilExpiry)} Reconecte para não
+                interromper a coleta.
+              </p>
+              <Button onClick={() => void startConnection()} variant="outline">
+                Reconectar Instagram
+              </Button>
+            </>
+          ) : null}
+        </>
       ) : (
-        <Button className="mt-4" onClick={() => void startConnection()}>
-          Conectar Instagram
-        </Button>
+        <>
+          <p className="text-muted-foreground">
+            Conecte sua conta Instagram Business para coletar os posts das suas
+            campanhas.
+          </p>
+          <Button onClick={() => void startConnection()}>Conectar Instagram</Button>
+        </>
       )}
-    </section>
+    </div>
   );
 }
