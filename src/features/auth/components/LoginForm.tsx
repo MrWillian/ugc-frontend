@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { loginSchema, type LoginValues } from "@/features/auth/schemas";
+import { RETURN_TO_PARAM, safeRedirectPath } from "@/lib/redirect";
 import { AuthForm } from "./AuthForm";
 
 function requestError(reason: unknown): string {
@@ -35,7 +36,8 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      router.replace("/dashboard");
+      const returnTo = new URLSearchParams(window.location.search).get(RETURN_TO_PARAM);
+      router.replace(safeRedirectPath(returnTo));
     } catch (reason) {
       setRequestFailure(requestError(reason));
     }

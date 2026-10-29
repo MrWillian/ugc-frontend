@@ -102,6 +102,26 @@ describe("auth forms", () => {
     expect(replace).toHaveBeenCalledWith("/dashboard");
   });
 
+  it.each([
+    [
+      "/auth/instagram/callback?code=meta-code&state=client-id",
+      "/auth/instagram/callback?code=meta-code&state=client-id",
+    ],
+    ["//evil.test", "/dashboard"],
+  ])("returns to next=%s after login as %s", async (next, expected) => {
+    const user = userEvent.setup();
+    auth.login.mockResolvedValueOnce();
+    window.history.pushState({}, "", `/login?next=${encodeURIComponent(next)}`);
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText("E-mail"), "a@b.com");
+    await user.type(screen.getByLabelText("Senha"), "password123!");
+    await user.click(screen.getByRole("button", { name: "Entrar" }));
+
+    expect(replace).toHaveBeenCalledWith(expected);
+    window.history.pushState({}, "", "/");
+  });
+
   it("sends exactly the documented signup fields and navigates on success", async () => {
     const user = userEvent.setup();
     auth.signup.mockResolvedValueOnce();
