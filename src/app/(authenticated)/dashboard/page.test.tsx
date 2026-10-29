@@ -31,6 +31,11 @@ vi.mock("@/features/dashboard/DashboardPopularWidget", () => ({
   DashboardPopularWidget: () => <div>Popular</div>,
 }));
 
+vi.mock("@/features/dashboard/DashboardInstagramCard", () => ({
+  DashboardInstagramCard: () => <div>Instagram</div>,
+  DashboardInstagramCardSkeleton: () => <span />,
+}));
+
 vi.mock("@/features/dashboard/DashboardFilterPanel", () => ({
   DashboardFilterPanel: () => <div>Filter</div>,
 }));
@@ -46,6 +51,7 @@ describe("DashboardPage", () => {
     expect(screen.getByRole("heading", { name: /Olá, Acme/i })).toBeInTheDocument();
     expect(screen.getByLabelText("Resumo do dashboard")).toBeInTheDocument();
     expect(screen.getByText("Feed")).toBeInTheDocument();
+    expect(screen.getByText("Instagram")).toBeInTheDocument();
   });
 
   it("marks the page header as the static shell marker", () => {
