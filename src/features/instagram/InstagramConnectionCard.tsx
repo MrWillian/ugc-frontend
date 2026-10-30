@@ -80,10 +80,12 @@ export function InstagramConnectionCard({
     };
   }, [reloadVersion]);
 
+  // The API also sets reconnectRequired when no account exists; that case is a first connection.
   const needsReconnect =
-    status?.reconnectRequired ||
-    status?.status === "EXPIRED" ||
-    status?.status === "REVOKED";
+    Boolean(status?.status) &&
+    (status?.reconnectRequired ||
+      status?.status === "EXPIRED" ||
+      status?.status === "REVOKED");
   const daysUntilExpiry = status?.daysUntilExpiry;
 
   async function startConnection() {

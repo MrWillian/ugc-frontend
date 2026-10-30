@@ -86,7 +86,8 @@ function instagramStatus() {
       pageName: null,
       expiresAt: null,
       daysUntilExpiry: null,
-      reconnectRequired: false,
+      // Mirrors the API, which flags reconnection even before any account exists.
+      reconnectRequired: true,
     };
   }
   return {
