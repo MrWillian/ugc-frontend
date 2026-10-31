@@ -60,7 +60,6 @@ describe("InstagramConnectionCard", () => {
   });
 
   it("offers to connect, not reconnect, when the client never connected", async () => {
-    // The backend flags reconnectRequired even when no account exists.
     fetchMock.mockResolvedValueOnce(
       Response.json({ ...disconnectedStatus, reconnectRequired: true }),
     );

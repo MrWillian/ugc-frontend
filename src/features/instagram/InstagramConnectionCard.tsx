@@ -80,7 +80,6 @@ export function InstagramConnectionCard({
     };
   }, [reloadVersion]);
 
-  // The API also sets reconnectRequired when no account exists; that case is a first connection.
   const needsReconnect =
     Boolean(status?.status) &&
     (status?.reconnectRequired ||
