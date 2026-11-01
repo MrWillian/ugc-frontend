@@ -147,6 +147,18 @@ describe("auth forms", () => {
     expect(replace).toHaveBeenCalledWith("/dashboard");
   });
 
+  it("opens the legal documents from the signup terms checkbox in a new tab", () => {
+    render(<SignupForm />);
+
+    expect(screen.getByRole("link", { name: "Termos de Uso" })).toHaveAttribute(
+      "href",
+      "/termos",
+    );
+    const privacy = screen.getByRole("link", { name: "Política de Privacidade" });
+    expect(privacy).toHaveAttribute("href", "/privacidade");
+    expect(privacy).toHaveAttribute("target", "_blank");
+  });
+
   it("renders an alert when login fails", async () => {
     const user = userEvent.setup();
     auth.login.mockRejectedValueOnce(new Error("Credenciais inválidas."));
