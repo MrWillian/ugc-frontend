@@ -137,6 +137,18 @@ describe("proxy", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
+  it.each(["/termos", "/privacidade", "/exclusao-de-dados"])(
+    "keeps the legal page %s public with or without a session",
+    (path) => {
+      const anonymous = new NextRequest(`http://localhost${path}`);
+      const authenticated = new NextRequest(`http://localhost${path}`);
+      authenticated.cookies.set("accessToken", "jwt-value");
+
+      expect(proxy(anonymous).headers.get("location")).toBeNull();
+      expect(proxy(authenticated).headers.get("location")).toBeNull();
+    },
+  );
+
   it("does not redirect unrelated paths", () => {
     const response = proxy(new NextRequest("http://localhost/about"));
 

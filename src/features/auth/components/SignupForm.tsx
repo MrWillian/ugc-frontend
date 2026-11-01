@@ -184,11 +184,21 @@ export function SignupForm() {
         />
         <span>
           Li e aceito os{" "}
-          <a className="text-primary hover:underline" href="#">
+          <a
+            className="text-primary hover:underline"
+            href="/termos"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             Termos de Uso
           </a>{" "}
           e{" "}
-          <a className="text-primary hover:underline" href="#">
+          <a
+            className="text-primary hover:underline"
+            href="/privacidade"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             Política de Privacidade
           </a>
         </span>

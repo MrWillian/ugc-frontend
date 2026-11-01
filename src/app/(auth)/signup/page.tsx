@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 import { AuthSplitLayout } from "@/components/layout/AuthSplitLayout";
 import { SignupForm } from "@/features/auth/components/SignupForm";
+import { LegalLinks } from "@/features/legal/components/LegalLinks";
 
 export default function SignupPage() {
   return (
@@ -33,6 +34,7 @@ export default function SignupPage() {
           Você poderá cancelar a qualquer momento.
         </p>
       </section>
+      <LegalLinks className="mt-6" />
     </AuthSplitLayout>
   );
 }

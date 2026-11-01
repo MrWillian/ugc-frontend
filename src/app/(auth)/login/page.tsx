@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 import { AuthSplitLayout } from "@/components/layout/AuthSplitLayout";
 import { LoginForm } from "@/features/auth/components/LoginForm";
+import { LegalLinks } from "@/features/legal/components/LegalLinks";
 
 export default function LoginPage() {
   return (
@@ -25,6 +26,7 @@ export default function LoginPage() {
           Seus dados são protegidos com criptografia SSL.
         </p>
       </section>
+      <LegalLinks className="mt-6" />
     </AuthSplitLayout>
   );
 }
