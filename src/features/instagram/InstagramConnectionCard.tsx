@@ -81,9 +81,10 @@ export function InstagramConnectionCard({
   }, [reloadVersion]);
 
   const needsReconnect =
-    status?.reconnectRequired ||
-    status?.status === "EXPIRED" ||
-    status?.status === "REVOKED";
+    Boolean(status?.status) &&
+    (status?.reconnectRequired ||
+      status?.status === "EXPIRED" ||
+      status?.status === "REVOKED");
   const daysUntilExpiry = status?.daysUntilExpiry;
 
   async function startConnection() {

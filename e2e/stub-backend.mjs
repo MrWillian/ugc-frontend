@@ -86,7 +86,7 @@ function instagramStatus() {
       pageName: null,
       expiresAt: null,
       daysUntilExpiry: null,
-      reconnectRequired: false,
+      reconnectRequired: true,
     };
   }
   return {

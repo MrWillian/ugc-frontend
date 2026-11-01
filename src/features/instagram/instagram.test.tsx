@@ -59,6 +59,21 @@ describe("InstagramConnectionCard", () => {
     expect(window.location.assign).toHaveBeenCalledWith(authUrl);
   });
 
+  it("offers to connect, not reconnect, when the client never connected", async () => {
+    fetchMock.mockResolvedValueOnce(
+      Response.json({ ...disconnectedStatus, reconnectRequired: true }),
+    );
+
+    render(<InstagramConnectionCard />);
+
+    expect(
+      await screen.findByRole("button", { name: "Conectar Instagram" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Reconectar Instagram" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the connected account username for an active connection", async () => {
     fetchMock.mockResolvedValueOnce(
       Response.json({
