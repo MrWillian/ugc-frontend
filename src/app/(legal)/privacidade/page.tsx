@@ -10,14 +10,13 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  const { brand, companyName, cnpj, address, dpoName, dpoEmail } = legalEntity;
+  const { brand, companyName, address, dpoName, dpoEmail } = legalEntity;
 
   return (
     <LegalDocument
       intro={
         <p>
-          Esta Política de Privacidade explica como o {brand}, operado por {companyName}{" "}
-          (CNPJ {cnpj}), trata dados pessoais na Plataforma, em conformidade com a Lei Geral
+          Esta Política de Privacidade explica como o {companyName} trata dados pessoais na Plataforma, em conformidade com a Lei Geral
           de Proteção de Dados Pessoais (Lei nº 13.709/2018, &quot;LGPD&quot;) e com o Marco
           Civil da Internet (Lei nº 12.965/2014). Ela se aplica aos Clientes que usam a
           Plataforma, aos Criadores cujos conteúdos são coletados e aos visitantes dos

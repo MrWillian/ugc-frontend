@@ -19,9 +19,8 @@ export default function LegalLayout({
       <footer className="border-t">
         <div className="mx-auto max-w-3xl space-y-1 px-6 py-6 text-center text-xs text-muted-foreground">
           <p>
-            {legalEntity.brand} · {legalEntity.companyName} · CNPJ {legalEntity.cnpj}
+            {legalEntity.companyName} · {legalEntity.address}
           </p>
-          <p>{legalEntity.address}</p>
         </div>
       </footer>
     </div>

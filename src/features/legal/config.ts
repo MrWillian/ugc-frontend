@@ -1,8 +1,6 @@
-// Placeholders in brackets must be replaced before publishing.
 export const legalEntity = {
   brand: "SocialProof",
   companyName: "SocialProof",
-  cnpj: "[CNPJ]",
   address: "Centro, Boquira - Bahia, Brasil",
   contactEmail: "williansoares.dev@gmail.com",
   dpoName: "Willian Marciel",

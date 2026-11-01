@@ -10,15 +10,14 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  const { brand, companyName, cnpj, address, contactEmail, forumCity } = legalEntity;
+  const { brand, companyName, address, contactEmail, forumCity } = legalEntity;
 
   return (
     <LegalDocument
       intro={
         <p>
-          Estes Termos de Uso regulam o acesso e o uso da plataforma {brand}, operada por{" "}
-          {companyName}, inscrita no CNPJ sob o nº {cnpj}, com sede em {address}. Ao criar
-          uma conta ou utilizar a plataforma, você declara que leu, entendeu e concorda com
+          Estes Termos de Uso regulam o acesso e o uso da plataforma {companyName}, com sede
+          em {address}. Ao criar uma conta ou utilizar a plataforma, você declara que leu, entendeu e concorda com
           estes Termos e com a nossa{" "}
           <Link className="font-medium text-primary hover:underline" href="/privacidade">
             Política de Privacidade
