@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  const { brand, companyName, address, dpoName, dpoEmail } = legalEntity;
+  const { brand, companyName, controllerName, address, dpoName, dpoEmail } = legalEntity;
 
   return (
     <LegalDocument
@@ -26,6 +26,10 @@ export default function PrivacyPage() {
       title="Política de Privacidade"
     >
       <LegalSection id="papeis" title="1. Quem é responsável pelos seus dados">
+        <p>
+          O {brand} é mantido por {controllerName}, pessoa física, com endereço em {address}.
+          Nesta Política, &quot;nós&quot; e &quot;{brand}&quot; se referem a esse responsável.
+        </p>
         <ul>
           <li>
             <strong>Dados dos Clientes</strong> (cadastro, conta e pagamento): o {brand} é o{" "}
@@ -47,17 +51,18 @@ export default function PrivacyPage() {
           <strong>Clientes e usuários do painel</strong>
         </p>
         <ul>
-          <li>nome, e-mail, nome da empresa, subdomínio e senha (armazenada de forma criptografada);</li>
+          <li>
+            nome, e-mail, nome da empresa, subdomínio e senha (armazenada apenas como hash,
+            de forma irreversível);
+          </li>
           <li>
             dados da conta profissional do Instagram conectada: identificador, nome de
             usuário e token de acesso concedido pelo login da Meta;
           </li>
           <li>
-            dados de assinatura e cobrança: plano, histórico de pagamentos e identificadores
-            da Stripe. Os dados completos do cartão são tratados apenas pela Stripe;
-          </li>
-          <li>
-            registros de acesso: endereço IP, data e hora, navegador e páginas acessadas.
+            dados de assinatura: plano, situação da assinatura, data de renovação e
+            identificadores da Stripe. O histórico de pagamentos e os dados do cartão ficam
+            com a Stripe.
           </li>
         </ul>
         <p>
@@ -66,11 +71,13 @@ export default function PrivacyPage() {
         <ul>
           <li>
             dados públicos das publicações que usam a hashtag de uma campanha: nome de
-            usuário, foto ou vídeo, legenda, link e data da publicação;
+            usuário, foto ou vídeo, legenda, link, data da publicação e número de curtidas e
+            de comentários;
           </li>
           <li>
             registro do consentimento: decisão (autorizado ou recusado), data e hora, canal
-            pelo qual o link foi enviado e, quando informado, o e-mail do Criador.
+            pelo qual o link foi enviado, endereço IP e navegador usados na decisão e, quando
+            informado, o e-mail do Criador.
           </li>
         </ul>
         <p>
@@ -96,19 +103,18 @@ export default function PrivacyPage() {
             essa autorização, o conteúdo não é exibido.
           </li>
           <li>
-            <strong>Processar pagamentos e emitir documentos fiscais:</strong> execução de
-            contrato e cumprimento de obrigação legal (art. 7º, II e V).
-          </li>
-          <li>
-            <strong>Guardar registros de acesso:</strong> cumprimento de obrigação legal
-            (art. 15 do Marco Civil da Internet).
+            <strong>Processar pagamentos e assinaturas:</strong> execução de contrato
+            (art. 7º, V).
           </li>
           <li>
             <strong>Prevenir fraudes e garantir a segurança da Plataforma:</strong> legítimo
             interesse (art. 7º, IX).
           </li>
           <li>
-            <strong>Exercer direitos em processos judiciais ou administrativos:</strong>{" "}
+            <strong>
+              Comprovar a autorização ou a recusa do Criador e exercer direitos em processos
+              judiciais ou administrativos:
+            </strong>{" "}
             art. 7º, VI.
           </li>
         </ul>
@@ -154,23 +160,25 @@ export default function PrivacyPage() {
         <ul>
           <li>
             <strong>Dados da conta do Cliente:</strong> enquanto a conta estiver ativa. Após o
-            encerramento, são eliminados ou anonimizados em até 90 dias.
+            pedido de encerramento, são eliminados nos prazos da página de{" "}
+            <Link className="font-medium text-primary hover:underline" href="/exclusao-de-dados">
+              exclusão de dados
+            </Link>
+            .
           </li>
           <li>
             <strong>Publicações de Criadores:</strong> enquanto a campanha do Cliente
-            existir, ou até o Criador recusar o consentimento ou pedir a remoção.
+            existir ou até o Criador pedir a remoção. Se o Criador recusar o consentimento, a
+            publicação nunca é exibida nos widgets, mas continua visível para o Cliente no
+            painel até a remoção ser pedida ou a campanha ser apagada.
           </li>
           <li>
             <strong>Registros de consentimento:</strong> pelo tempo necessário para comprovar
             a autorização ou a recusa.
           </li>
           <li>
-            <strong>Registros de acesso:</strong> 6 meses, conforme o Marco Civil da
-            Internet.
-          </li>
-          <li>
-            <strong>Dados fiscais e de cobrança:</strong> pelo prazo exigido pela legislação
-            tributária, de até 5 anos.
+            <strong>Histórico de pagamentos:</strong> mantido pela Stripe, conforme a
+            política de retenção dela.
           </li>
         </ul>
       </LegalSection>
@@ -217,7 +225,7 @@ export default function PrivacyPage() {
       <LegalSection id="seguranca" title="8. Segurança">
         <p>
           Adotamos medidas técnicas e administrativas para proteger os dados, como conexão
-          criptografada (HTTPS), senhas armazenadas com criptografia, cookies de sessão
+          criptografada (HTTPS), senhas armazenadas como hash, cookies de sessão
           protegidos, controle de acesso por conta e isolamento entre os dados de cada
           Cliente. Em caso de incidente de segurança que possa causar risco ou dano relevante
           aos titulares, comunicaremos a ANPD e os titulares afetados, conforme o art. 48 da

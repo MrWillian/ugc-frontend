@@ -17,7 +17,8 @@ export default function DataDeletionPage() {
       intro={
         <p>
           Você pode pedir a exclusão dos seus dados do {brand} a qualquer momento. Veja abaixo
-          o passo a passo para o seu caso. Mais detalhes sobre como tratamos dados estão na{" "}
+          o passo a passo para o seu caso. Os pedidos são feitos por e-mail e atendidos
+          manualmente pelo nosso Encarregado. Mais detalhes sobre como tratamos dados estão na{" "}
           <Link className="font-medium text-primary hover:underline" href="/privacidade">
             Política de Privacidade
           </Link>
@@ -35,7 +36,8 @@ export default function DataDeletionPage() {
           <li>Informe o nome da empresa e o subdomínio da conta.</li>
           <li>
             Confirmaremos o pedido e excluiremos a conta, as campanhas, os widgets, as
-            publicações coletadas e o token de acesso ao Instagram.
+            publicações coletadas, os registros de consentimento e o token de acesso ao
+            Instagram.
           </li>
         </ol>
         <p>
@@ -59,10 +61,15 @@ export default function DataDeletionPage() {
             publicações.
           </li>
           <li>
-            Removeremos as publicações, os registros de consentimento e as exibições nos
-            widgets, e avisaremos os Clientes responsáveis.
+            Retiraremos as publicações dos widgets, apagaremos a mídia, o nome de usuário e os
+            registros de consentimento, e avisaremos os Clientes responsáveis.
           </li>
         </ol>
+        <p>
+          Guardamos apenas o identificador de cada publicação removida, marcado como
+          bloqueado, para que ela não seja coletada de novo enquanto a campanha continuar
+          ativa.
+        </p>
         <p>
           Se você autorizou a exibição de uma publicação pelo link de consentimento e mudou de
           ideia, o mesmo pedido revoga a autorização.
@@ -90,17 +97,17 @@ export default function DataDeletionPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="prazos" title="4. Prazos e dados mantidos por obrigação legal">
+      <LegalSection id="prazos" title="4. Prazos e dados mantidos por terceiros">
         <ul>
           <li>Respondemos aos pedidos em até {dataRequestResponseDays} dias.</li>
+          <li>Após a confirmação, a exclusão no nosso banco de dados é concluída em até 30 dias.</li>
           <li>
-            Após a confirmação, a exclusão é concluída em até 30 dias, incluindo as cópias de
-            segurança.
+            Cópias de segurança do banco de dados são eliminadas conforme o ciclo de retenção
+            do nosso provedor de hospedagem.
           </li>
           <li>
-            Alguns dados podem ser mantidos pelo prazo exigido em lei, mesmo após o pedido:
-            registros de acesso por 6 meses (Marco Civil da Internet) e dados fiscais e de
-            cobrança por até 5 anos. Depois disso, são eliminados.
+            O histórico de pagamentos fica com a Stripe, que o mantém conforme a própria
+            política de retenção e as obrigações legais dela.
           </li>
         </ul>
       </LegalSection>

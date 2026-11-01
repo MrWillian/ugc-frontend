@@ -1,6 +1,7 @@
 export const legalEntity = {
   brand: "SocialProof",
   companyName: "SocialProof",
+  controllerName: "Willian Marciel",
   address: "Centro, Boquira - Bahia, Brasil",
   contactEmail: "williansoares.dev@gmail.com",
   dpoName: "Willian Marciel",

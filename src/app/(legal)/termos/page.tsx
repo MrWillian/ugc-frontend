@@ -10,14 +10,14 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  const { brand, companyName, address, contactEmail, forumCity } = legalEntity;
+  const { brand, companyName, controllerName, address, contactEmail, forumCity } = legalEntity;
 
   return (
     <LegalDocument
       intro={
         <p>
-          Estes Termos de Uso regulam o acesso e o uso da plataforma {companyName}, com sede
-          em {address}. Ao criar uma conta ou utilizar a plataforma, você declara que leu, entendeu e concorda com
+          Estes Termos de Uso regulam o acesso e o uso da plataforma {companyName}, mantida
+          por {controllerName}, pessoa física, com endereço em {address}. Ao criar uma conta ou utilizar a plataforma, você declara que leu, entendeu e concorda com
           estes Termos e com a nossa{" "}
           <Link className="font-medium text-primary hover:underline" href="/privacidade">
             Política de Privacidade
@@ -92,8 +92,8 @@ export default function TermsPage() {
       <LegalSection id="planos" title="4. Planos, pagamento e limites">
         <ul>
           <li>
-            A Plataforma pode oferecer um período de teste gratuito. Ao fim do teste, o uso
-            continuado depende da contratação de um plano pago.
+            A Plataforma oferece um plano gratuito, com os limites do plano inicial. Limites
+            maiores dependem da contratação de um plano pago.
           </li>
           <li>
             Os pagamentos são processados pela Stripe. O {brand} não armazena os dados
@@ -105,8 +105,9 @@ export default function TermsPage() {
             plano.
           </li>
           <li>
-            O Cliente pode cancelar a assinatura a qualquer momento. O cancelamento
-            interrompe as cobranças futuras e não gera reembolso proporcional do período já
+            O Cliente pode cancelar a assinatura a qualquer momento. O cancelamento tem
+            efeito imediato: a conta volta na hora aos limites do plano inicial e as
+            cobranças futuras são interrompidas. Não há reembolso proporcional do período já
             pago, salvo quando exigido por lei.
           </li>
           <li>
