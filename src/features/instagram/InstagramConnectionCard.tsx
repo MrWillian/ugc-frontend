@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState, type JSX } from "react";
 import { Button } from "@/components/ui/button";
 import type { InstagramStatus } from "@/types";
@@ -30,6 +31,28 @@ function formatDate(iso: string): string {
 function expiryWarning(days: number): string {
   if (days <= 0) return "A conexão expira hoje.";
   return `A conexão expira em ${days} ${days === 1 ? "dia" : "dias"}.`;
+}
+
+function InstagramRequirements(): JSX.Element {
+  return (
+    <details className="group text-muted-foreground">
+      <summary className="inline-flex cursor-pointer list-none items-center gap-1 font-medium hover:text-foreground [&::-webkit-details-marker]:hidden">
+        <ChevronRight
+          aria-hidden="true"
+          className="size-4 transition-transform group-open:rotate-90"
+        />
+        O que preciso para conectar?
+      </summary>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>Perfil profissional no Instagram (contas pessoais não funcionam)</li>
+        <li>Perfil vinculado a uma página do Facebook, pelo Meta Business Suite</li>
+        <li>
+          Login com um Facebook que tenha acesso a essa página, autorizando-a na
+          tela da Meta
+        </li>
+      </ul>
+    </details>
+  );
 }
 
 export function InstagramConnectionCard({
@@ -179,6 +202,7 @@ export function InstagramConnectionCard({
             Conecte sua conta Instagram Business para coletar os posts das suas
             campanhas.
           </p>
+          <InstagramRequirements />
           <Button onClick={() => void startConnection()}>Conectar Instagram</Button>
         </>
       )}

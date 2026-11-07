@@ -74,6 +74,41 @@ describe("InstagramConnectionCard", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("lists the account requirements before the client connects", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json(disconnectedStatus));
+
+    render(<InstagramConnectionCard />);
+
+    expect(
+      await screen.findByText("O que preciso para conectar?"),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Perfil profissional no Instagram/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/vinculado a uma página do Facebook/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Login com um Facebook que tenha acesso/),
+    ).toBeInTheDocument();
+  });
+
+  it("hides the account requirements once connected", async () => {
+    fetchMock.mockResolvedValueOnce(
+      Response.json({
+        ...disconnectedStatus,
+        connected: true,
+        status: "ACTIVE",
+        accountUsername: "acme",
+      }),
+    );
+
+    render(<InstagramConnectionCard />);
+
+    expect(await screen.findByText(/@acme/)).toBeInTheDocument();
+    expect(
+      screen.queryByText("O que preciso para conectar?"),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the connected account username for an active connection", async () => {
     fetchMock.mockResolvedValueOnce(
       Response.json({
