@@ -11,6 +11,7 @@ describe("proxy config", () => {
       "/posts/:path*",
       "/moderation/:path*",
       "/settings/:path*",
+      "/billing/:path*",
       "/auth/instagram/callback",
       "/login",
       "/signup",
@@ -56,6 +57,14 @@ describe("proxy", () => {
 
     expect(response.headers.get("location")).toBe(
       "http://localhost/login?next=%2Fsettings",
+    );
+  });
+
+  it("redirects a missing-cookie billing request to login", () => {
+    const response = proxy(new NextRequest("http://localhost/billing"));
+
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/login?next=%2Fbilling",
     );
   });
 

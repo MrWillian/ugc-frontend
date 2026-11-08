@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   LayoutGrid,
   Settings,
+  CreditCard,
 } from "lucide-react";
 
 export interface NavItem {
@@ -20,5 +21,6 @@ export const mainNavItems: NavItem[] = [
   { href: "/campaigns", label: "Campanhas", icon: Megaphone },
   { href: "/moderation", label: "Moderação", icon: ShieldCheck },
   { href: "/widgets", label: "Widgets", icon: LayoutGrid },
+  { href: "/billing", label: "Planos", icon: CreditCard },
   { href: "/settings", label: "Configurações", icon: Settings },
 ];

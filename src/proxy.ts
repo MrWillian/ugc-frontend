@@ -10,6 +10,7 @@ const protectedPrefixes = [
   "/posts",
   "/moderation",
   "/settings",
+  "/billing",
   "/auth/instagram/callback",
 ];
 const publicPaths = new Set(["/login", "/signup"]);
@@ -41,6 +42,7 @@ export const config = {
     "/posts/:path*",
     "/moderation/:path*",
     "/settings/:path*",
+    "/billing/:path*",
     "/auth/instagram/callback",
     "/login",
     "/signup",

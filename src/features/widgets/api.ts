@@ -1,3 +1,4 @@
+import { ensureOk } from "@/lib/api-error";
 import type {
   CreateWidgetBody,
   PublicWidgetPost,
@@ -5,38 +6,14 @@ import type {
   Widget,
 } from "@/types";
 
-async function responseMessage(response: Response): Promise<string> {
-  const payload: unknown = await response.json().catch(() => null);
-
-  if (typeof payload === "object" && payload !== null && "message" in payload) {
-    const { message } = payload as { message?: unknown };
-
-    if (Array.isArray(message)) {
-      return message
-        .filter((item): item is string => typeof item === "string")
-        .join(" ");
-    }
-
-    if (typeof message === "string") {
-      return message;
-    }
-  }
-
-  return "Não foi possível concluir a solicitação.";
-}
-
 async function parseWidget(response: Response): Promise<Widget> {
-  if (!response.ok) {
-    throw new Error(await responseMessage(response));
-  }
+  await ensureOk(response);
   return response.json() as Promise<Widget>;
 }
 
 export async function fetchWidgets(): Promise<Widget[]> {
   const response = await fetch("/api/widgets", { credentials: "same-origin" });
-  if (!response.ok) {
-    throw new Error(await responseMessage(response));
-  }
+  await ensureOk(response);
   return response.json() as Promise<Widget[]>;
 }
 
@@ -75,9 +52,7 @@ export async function deleteWidget(id: string): Promise<void> {
     method: "DELETE",
     credentials: "same-origin",
   });
-  if (!response.ok) {
-    throw new Error(await responseMessage(response));
-  }
+  await ensureOk(response);
 }
 
 export async function fetchWidgetPreviewPosts(
@@ -86,8 +61,6 @@ export async function fetchWidgetPreviewPosts(
   const response = await fetch(`/api/widget/${id}/posts`, {
     credentials: "same-origin",
   });
-  if (!response.ok) {
-    throw new Error(await responseMessage(response));
-  }
+  await ensureOk(response);
   return response.json() as Promise<PublicWidgetPost[]>;
 }
