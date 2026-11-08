@@ -212,6 +212,9 @@ describe("CampaignForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Limite de campanhas ativas do plano atingido.",
     );
+    expect(
+      screen.getByRole("link", { name: "Ver planos e fazer upgrade" }),
+    ).toHaveAttribute("href", "/billing");
     expect(navigationMocks.replace).not.toHaveBeenCalled();
   });
 });

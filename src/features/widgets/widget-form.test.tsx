@@ -109,6 +109,9 @@ describe("WidgetForm", () => {
     expect(
       await screen.findByText("Limite de widgets do plano atingido."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Ver planos e fazer upgrade" }),
+    ).toHaveAttribute("href", "/billing");
     expect(navigationMocks.replace).not.toHaveBeenCalled();
   });
 

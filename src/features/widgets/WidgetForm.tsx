@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PlanLimitAlert } from "@/features/billing/PlanLimitAlert";
+import { isPlanLimitError } from "@/lib/api-error";
 import { parseFiltersJson } from "@/features/widgets/filters";
 import { useCreateWidget, useUpdateWidget, useWidget } from "@/features/widgets/hooks";
 import { WIDGET_LAYOUT_OPTIONS } from "@/features/widgets/layout";
@@ -49,6 +51,7 @@ export function WidgetForm(props: WidgetFormProps): JSX.Element {
   const updateMutation = useUpdateWidget();
   const widgetQuery = useWidget(props.mode === "edit" ? props.widgetId : "");
   const [requestFailure, setRequestFailure] = useState("");
+  const [planLimitHit, setPlanLimitHit] = useState(false);
   const [filtersError, setFiltersError] = useState("");
   const isEdit = props.mode === "edit";
   const {
@@ -81,6 +84,7 @@ export function WidgetForm(props: WidgetFormProps): JSX.Element {
 
   const onSubmit = async (values: WidgetFormValues) => {
     setRequestFailure("");
+    setPlanLimitHit(false);
     setFiltersError("");
     const body = toBody(values);
     if (!body) {
@@ -102,6 +106,7 @@ export function WidgetForm(props: WidgetFormProps): JSX.Element {
         router.replace(`/widgets/${created.id}`);
       }
     } catch (reason) {
+      setPlanLimitHit(isPlanLimitError(reason));
       setRequestFailure(requestError(reason));
     }
   };
@@ -186,9 +191,13 @@ export function WidgetForm(props: WidgetFormProps): JSX.Element {
           ) : null}
         </div>
         {requestFailure ? (
-          <p className="text-sm text-destructive" role="alert">
-            {requestFailure}
-          </p>
+          planLimitHit ? (
+            <PlanLimitAlert message={requestFailure} />
+          ) : (
+            <p className="text-sm text-destructive" role="alert">
+              {requestFailure}
+            </p>
+          )
         ) : null}
         <Button disabled={isSubmitting} type="submit">
           {isSubmitting ? "Enviando..." : "Salvar"}

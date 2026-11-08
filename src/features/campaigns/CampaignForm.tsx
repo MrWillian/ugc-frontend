@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PlanLimitAlert } from "@/features/billing/PlanLimitAlert";
 import { createCampaign, fetchCampaign, updateCampaign } from "@/features/campaigns/api";
+import { isPlanLimitError } from "@/lib/api-error";
 import {
   campaignEditSchema,
   type CampaignEditValues,
@@ -42,6 +44,7 @@ function toCreateBody(values: CampaignFormValues): CreateCampaignBody {
 export function CampaignForm(props: CampaignFormProps): JSX.Element {
   const router = useRouter();
   const [requestFailure, setRequestFailure] = useState("");
+  const [planLimitHit, setPlanLimitHit] = useState(false);
   const [isLoadingCampaign, setIsLoadingCampaign] = useState(props.mode === "edit");
   const isEdit = props.mode === "edit";
   const {
@@ -99,6 +102,7 @@ export function CampaignForm(props: CampaignFormProps): JSX.Element {
 
   const onSubmit = async (values: CampaignEditValues) => {
     setRequestFailure("");
+    setPlanLimitHit(false);
 
     try {
       if (props.mode === "edit") {
@@ -113,6 +117,7 @@ export function CampaignForm(props: CampaignFormProps): JSX.Element {
       }
       router.replace("/campaigns");
     } catch (reason) {
+      setPlanLimitHit(isPlanLimitError(reason));
       setRequestFailure(requestError(reason));
     }
   };
@@ -184,9 +189,13 @@ export function CampaignForm(props: CampaignFormProps): JSX.Element {
         </div>
       ) : null}
       {requestFailure ? (
-        <p className="text-sm text-destructive" role="alert">
-          {requestFailure}
-        </p>
+        planLimitHit ? (
+          <PlanLimitAlert message={requestFailure} />
+        ) : (
+          <p className="text-sm text-destructive" role="alert">
+            {requestFailure}
+          </p>
+        )
       ) : null}
       <Button disabled={isSubmitting} type="submit">
         {isSubmitting ? "Enviando..." : "Salvar"}

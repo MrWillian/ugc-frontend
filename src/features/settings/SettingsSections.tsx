@@ -58,8 +58,8 @@ export function SettingsSections() {
         <p className="text-sm">
           Plano atual: <span className="font-semibold">{user.plan}</span>
         </p>
-        <Button className="mt-4" disabled type="button">
-          Upgrade — em breve
+        <Button asChild className="mt-4" type="button">
+          <Link href="/billing">Ver planos e fazer upgrade</Link>
         </Button>
       </SettingsCard>
 
